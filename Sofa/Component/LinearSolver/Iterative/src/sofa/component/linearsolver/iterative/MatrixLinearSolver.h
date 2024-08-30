@@ -83,10 +83,11 @@ class MatrixLinearSolverInternalData
 {
 public:
     typedef typename TVector::Real Real;
-    typedef sofa::linearalgebra::SparseMatrix<Real> JMatrixType;
+    // typedef sofa::linearalgebra::SparseMatrix<Real> JMatrixType;
+    typedef linearalgebra::CompressedRowSparseMatrix<SReal> JMatrixType;
     typedef linearalgebra::BaseMatrix ResMatrixType;
 
-    template<typename MReal>
+    /*template<typename MReal>
     JMatrixType * copyJmatrix(linearalgebra::SparseMatrix<MReal> * J)
     {
         J_local.clear();
@@ -103,15 +104,49 @@ public:
             }
         }
         return &J_local;
+    }*/
+
+    template<typename MReal>
+    JMatrixType * copyJmatrix(linearalgebra::CompressedRowSparseMatrix<MReal> * J)
+    {
+        J_local.clear();
+        J_local.resize(J->rows(),J->cols());
+        for(unsigned int it_row = 0; it_row < J->rowIndex.size();it_row ++)
+        {
+            const auto row = J->rowIndex[it_row];
+            typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J->rowBegin[it_row],J->rowBegin[it_row+1]);
+            for (auto it_col = rowRange.begin(); it_col < rowRange.end(); ++it_col)
+            {
+                const auto col = J->colsIndex[it_col];
+                const auto val = J->colsValue[it_col];
+                J_local.set(row,col,val);
+            }
+        }
     }
 
-    void projectForceInConstraintSpace(linearalgebra::BaseVector* r,const linearalgebra::BaseVector* f) {
+    /*void projectForceInConstraintSpace(linearalgebra::BaseVector* r,const linearalgebra::BaseVector* f) {
         for (typename linearalgebra::SparseMatrix<Real>::LineConstIterator jit = J_local.begin(), jitend = J_local.end(); jit != jitend; ++jit) {
             auto row = jit->first;
             auto force = f->element(row);
             for (typename linearalgebra::SparseMatrix<Real>::LElementConstIterator i2 = jit->second.begin(), i2end = jit->second.end(); i2 != i2end; ++i2) {
                 auto col = i2->first;
                 auto val = i2->second;
+                r->add(col,val * force);
+            }
+        }
+    }*/
+
+    void projectForceInConstraintSpace(linearalgebra::BaseVector* r,const linearalgebra::BaseVector* f) {
+
+        for (unsigned int it_row = 0; it_row < J_local.rowIndex.size(); ++it_row)
+        {
+            const auto row = J_local.rowIndex[it_row];
+            auto force = f->element(row);
+            typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J_local.rowBegin[it_row],J_local.rowBegin[it_row+1]);
+            for (auto i = rowRange.begin(); i < rowRange.end(); ++i)
+            {
+                const auto col = J_local.colsIndex[i];
+                const auto val = J_local.colsValue[i];
                 r->add(col,val * force);
             }
         }
@@ -127,11 +162,13 @@ public:
         {
             return j;
         }
-        else if (linearalgebra::SparseMatrix<double> * j = dynamic_cast<linearalgebra::SparseMatrix<double> *>(J))
+        //else if (linearalgebra::SparseMatrix<double> * j = dynamic_cast<linearalgebra::SparseMatrix<double> *>(J))
+        else if (linearalgebra::CompressedRowSparseMatrix<double> * j = dynamic_cast<linearalgebra::CompressedRowSparseMatrix<double> *>(J))
         {
             return copyJmatrix(j);
         }
-        else if (linearalgebra::SparseMatrix<float> * j = dynamic_cast<linearalgebra::SparseMatrix<float> *>(J))
+        // else if (linearalgebra::SparseMatrix<float> * j = dynamic_cast<linearalgebra::SparseMatrix<float> *>(J))
+        else if (linearalgebra::CompressedRowSparseMatrix<float> * j = dynamic_cast<linearalgebra::CompressedRowSparseMatrix<float> *>(J))
         {
             return copyJmatrix(j);
         }
@@ -217,6 +254,10 @@ public:
 
     /// Get the linear system left-hand term vector, or nullptr if this solver does not build it
     Vector* getSystemLHVector() { return l_linearSystem ? l_linearSystem->getSolutionVector() : nullptr; }
+
+    linearalgebra::CompressedRowSparseMatrix<SReal>* getConstraintGradient();
+    // linearalgebra::SparseMatrix<SReal>* getConstraintGradient();
+    // Matrix* getConstraintGradient();
 
     /// Get the linear system matrix, or nullptr if this solver does not build it
     linearalgebra::BaseMatrix* getSystemBaseMatrix() override;
