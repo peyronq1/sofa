@@ -30,7 +30,10 @@ namespace sofa::simulation::mechanicalvisitor
 MechanicalGetConstraintJacobianVisitor::MechanicalGetConstraintJacobianVisitor(
         const core::ConstraintParams* cparams, linearalgebra::BaseMatrix * _J, const sofa::core::behavior::MultiMatrixAccessor* _matrix)
     : BaseMechanicalVisitor(cparams) , cparams(cparams), J(_J), matrix(_matrix), offset(0)
-{}
+{
+    msg_warning("MechanicalGetConstraintJacobianVisitor")<<"Function used.";
+    msg_warning("MechanicalGetConstraintJacobianVisitor") << "Base matrix." << *_J;
+}
 
 MechanicalGetConstraintJacobianVisitor::Result MechanicalGetConstraintJacobianVisitor::fwdMechanicalState(simulation::Node* /*node*/, core::behavior::BaseMechanicalState* ms)
 {
