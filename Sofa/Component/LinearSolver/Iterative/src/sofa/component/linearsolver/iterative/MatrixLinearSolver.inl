@@ -707,7 +707,7 @@ bool MatrixLinearSolver<Matrix,Vector>::buildComplianceMatrix(const sofa::core::
 
     executeVisitor(MechanicalGetConstraintJacobianVisitor(cparams,j_local));
 
-    msg_warning("buildComplianceMatrix")<<"j_local.rowIndex.size = " << j_local->rowIndex.size();
+    msg_warning("buildComplianceMatrix")<<"j_local = " << *j_local;
 
     return addJMInvJt(result,j_local,fact);
 }

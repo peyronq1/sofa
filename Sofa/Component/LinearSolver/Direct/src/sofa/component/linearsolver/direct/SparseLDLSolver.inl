@@ -230,7 +230,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
         Real* line = JLinv[localRow];
         typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J->rowBegin[it_row],J->rowBegin[it_row+1]);
         for (auto it_col = rowRange.begin(); it_col < rowRange.end(); ++it_col){
-            auto col = J->colsIndex[it_col];
+            int col = data->invperm[J->colsIndex[it_col]];
             Real val = J->colsValue[it_col];
 
             line[col] = val;
