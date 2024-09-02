@@ -154,7 +154,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
                    = (L^-1 * J^T)^T * D^-1 * (L^-1 * J^T)
     */
 
-    /*if (J->rowSize() == 0)
+    if (J->rowSize() == 0)
     {
         return true;
     }
@@ -164,21 +164,6 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
     for (auto jit = J->begin(), jitend = J->end(); jit != jitend; ++jit)
     {
         sofa::SignedIndex l = jit->first;
-        Jlocal2global.push_back(l);
-    }*/
-
-    if (J->rows() == 0)
-    {
-        return true;
-    }
-
-    Jlocal2global.clear();
-    Jlocal2global.reserve(J->rows());
-
-    for (unsigned int it_row = 0; it_row < J->rowIndex.size(); ++it_row)
-    {
-        auto row = J->rowIndex[it_row];
-        sofa::SignedIndex l = row;
         Jlocal2global.push_back(l);
     }
 
@@ -196,7 +181,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
     simulation::TaskScheduler* taskScheduler = simulation::MainTaskSchedulerFactory::createInRegistry();
     assert(taskScheduler);
 
-    /*JLinv.clear();
+    JLinv.clear();
     JLinv.resize(J->rowSize(), data->n);
     JLinvDinv.resize(J->rowSize(), data->n);
 
@@ -212,38 +197,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
 
             line[col] = val;
         }
-    }*/
-
-    JLinv.clear();
-    JLinv.resize(J->rows(), data->n);
-    JLinvDinv.resize(J->rows(), data->n);
-
-    // copy J in to JLinv taking into account the permutation
-    unsigned int localRow = 0;
-    for (unsigned int it_row = 0; it_row < J->rowIndex.size(); ++it_row,++localRow)
-    {
-        auto row = J->rowIndex[it_row];
-        Real* line = JLinv[localRow];
-        typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J->rowBegin[it_row],J->rowBegin[it_row+1]);
-        for (auto it_col = rowRange.begin(); it_col < rowRange.end(); ++it_col){
-            auto col = J->colsIndex[it_col];
-            Real val = J->colsValue[it_col];
-
-            line[col] = val;
-        }
-        
     }
-    /*for (auto jit = J->begin(), jitend = J->end(); jit != jitend; ++jit, ++localRow)
-    {
-        Real* line = JLinv[localRow];
-        for (auto it = jit->second.begin(), i2end = jit->second.end(); it != i2end; ++it)
-        {
-            int col = data->invperm[it->first];
-            Real val = it->second;
-
-            line[col] = val;
-        }
-    }*/
 
     {
         SCOPED_TIMER("LowerSystem");

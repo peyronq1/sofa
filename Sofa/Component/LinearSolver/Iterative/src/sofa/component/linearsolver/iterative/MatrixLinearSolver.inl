@@ -330,14 +330,6 @@ linearalgebra::BaseMatrix* MatrixLinearSolver<Matrix, Vector, NoThreadManager>::
     }
     return l_linearSystem->getSystemMatrix();
 }
-template<class Matrix, class Vector>
-linearalgebra::CompressedRowSparseMatrix<SReal>* MatrixLinearSolver<Matrix,Vector,NoThreadManager>::getConstraintGradient()
-//linearalgebra::SparseMatrix<SReal>* MatrixLinearSolver<Matrix,Vector,NoThreadManager>::getConstraintGradient()
-//Matrix* MatrixLinearSolver<Matrix,Vector,NoThreadManager>::getConstraintGradient()
-{
-    // const JMatrixType * j_local = internalData.getLocalJ()
-    return internalData.getLocalJ();
-}
 
 template<class Matrix, class Vector>
 void MatrixLinearSolver<Matrix,Vector>::solveSystem()
@@ -422,8 +414,7 @@ bool MatrixLinearSolver<Matrix, Vector>::addJMInvJtLocal(Matrix* M, ResMatrixTyp
         return singleThreadAddJMInvJtLocal(M, result, J, fact);
     }
 
-    // static_assert(std::is_same_v<JMatrixType, linearalgebra::SparseMatrix<Real>>, "This function supposes a SparseMatrix");
-    static_assert(std::is_same_v<JMatrixType, linearalgebra::CompressedRowSparseMatrix<Real>>, "This function supposes a SparseMatrix");
+    static_assert(std::is_same_v<JMatrixType, linearalgebra::SparseMatrix<Real>>, "This function supposes a SparseMatrix");
 
     auto* systemMatrix = getSystemMatrix();
     if (!systemMatrix)
@@ -447,7 +438,7 @@ bool MatrixLinearSolver<Matrix, Vector>::addJMInvJtLocal(Matrix* M, ResMatrixTyp
 
     std::mutex mutex;
 
-    /*simulation::parallelForEach(*taskScheduler, 0, J->rowSize(),
+    simulation::parallelForEach(*taskScheduler, 0, J->rowSize(),
         [&](const typename JMatrixType::Index row)
         {
             rhsVector[row].resize(J->colSize());
@@ -483,66 +474,16 @@ bool MatrixLinearSolver<Matrix, Vector>::addJMInvJtLocal(Matrix* M, ResMatrixTyp
                 result->add(row2, row, columnResult[row][row2]);
             }
         }
-    );*/
-
-    simulation::parallelForEach(*taskScheduler, 0, J->rows(),
-        [&](unsigned int it_row)
-        {
-            rhsVector[it_row].resize(J->cols());
-            lhsVector[it_row].resize(J->cols());
-            columnResult[it_row].resize(J->cols());
-            const auto row = J->rowIndex[it_row];
-
-            typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J->rowBegin[it_row],J->rowBegin[it_row+1]);
-            // STEP 1 : put each line of matrix Jt in the right hand term of the system
-            for (auto i = rowRange.begin(); i < rowRange.end(); ++i)
-            {
-                const auto col = J->colsIndex[i];
-                rhsVector[it_row].set(i, J->element(row, col)); // linearSystem.systemMatrix->rowSize()
-            }
-
-            // STEP 2 : solve the system :
-            this->solve(*systemMatrix, lhsVector[row], rhsVector[row]);
-
-            // STEP 3 : project the result using matrix J
-            for (unsigned int it_row2 = 0; it_row2 < J->rowIndex.size(); ++it_row2)
-            {
-                Real acc = 0;
-                const auto row2 = J->rowIndex[it_row2];
-                typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange2(J->rowBegin[it_row2],J->rowBegin[it_row2+1]);
-                for (auto i2 = rowRange2.begin(); i2 < rowRange2.end(); ++i2)
-                {
-                    const auto col2 = J->colsIndex[i2];
-                    const auto val2 = J->colsValue[i2];
-                    acc += val2 * lhsVector[row].element(col2);
-                }
-                acc *= fact;
-                columnResult[row][row2] += acc;
-            }
-
-            // STEP 4 : assembly of the result
-            std::lock_guard lock(mutex);
-
-            for (unsigned int it_row2 = 0; it_row2 < J->rowIndex.size(); ++it_row2)
-            {
-                const auto row2 = J->rowIndex[it_row2];
-                result->add(row2, row, columnResult[row][row2]);
-            }
-        }
     );
 
     return true;
 }
 
-
-
-
-/*template<class Matrix, class Vector>
+template<class Matrix, class Vector>
 bool MatrixLinearSolver<Matrix, Vector>::singleThreadAddJMInvJtLocal(Matrix* M, ResMatrixType* result, const JMatrixType* J, const SReal fact)
 {
     SOFA_UNUSED(M);
-    // static_assert(std::is_same_v<JMatrixType, linearalgebra::SparseMatrix<Real>>, "This function supposes a SparseMatrix");
-    static_assert(std::is_same_v<JMatrixType, linearalgebra::CompressedRowSparseMatrix<Real>>, "This function supposes a SparseMatrix");
+    static_assert(std::is_same_v<JMatrixType, linearalgebra::SparseMatrix<Real>>, "This function supposes a SparseMatrix");
 
     auto* systemMatrix = getSystemMatrix();
     if (!systemMatrix)
@@ -574,60 +515,6 @@ bool MatrixLinearSolver<Matrix, Vector>::singleThreadAddJMInvJtLocal(Matrix* M, 
             Real acc = 0;
             for (const auto& [col2, val2] : line)
             {
-                acc += val2 * getSystemLHVector()->element(col2);
-            }
-            acc *= fact;
-            result->add(row2, row, acc);
-        }
-    }
-
-    return true;
-}*/
-
-template<class Matrix, class Vector>
-bool MatrixLinearSolver<Matrix, Vector>::singleThreadAddJMInvJtLocal(Matrix* M, ResMatrixType* result, const JMatrixType* J, const SReal fact)
-{
-    SOFA_UNUSED(M);
-    // static_assert(std::is_same_v<JMatrixType, linearalgebra::SparseMatrix<Real>>, "This function supposes a SparseMatrix");
-    static_assert(std::is_same_v<JMatrixType, linearalgebra::CompressedRowSparseMatrix<Real>>, "This function supposes a SparseMatrix");
-
-    auto* systemMatrix = getSystemMatrix();
-    if (!systemMatrix)
-    {
-        msg_error() << "System matrix is not setup properly";
-        return false;
-    }
-
-    if (linearSystem.needInvert)
-    {
-        this->invert(*systemMatrix);
-        linearSystem.needInvert = false;
-    }
-
-    for (unsigned int it_row = 0; it_row < J->rowIndex.size(); ++it_row)
-    {
-        auto row = J->rowIndex[it_row];
-        typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange(J->rowBegin[it_row],J->rowBegin[it_row+1]);
-        // STEP 1 : put each line of matrix Jt in the right hand term of the system
-        for (auto i = rowRange.begin(); i < rowRange.end(); ++i)
-        {
-            auto col = J->colsIndex[i];
-            this->getSystemRHVector()->set(i, J->element(row, col)); // linearSystem.systemMatrix->rowSize()
-        }
-
-        // STEP 2 : solve the system :
-        this->solve(*systemMatrix, *this->getSystemLHVector(), *this->getSystemRHVector());
-
-        // STEP 3 : project the result using matrix J
-        for (unsigned int it_row2 = 0; it_row2 < J->rowIndex.size(); ++it_row2)
-        {
-            Real acc = 0;
-            auto row2 = J->rowIndex[it_row2];
-            typename linearalgebra::CompressedRowSparseMatrix<SReal>::Range rowRange2(J->rowBegin[it_row2],J->rowBegin[it_row2+1]);
-            for (auto i2 = rowRange2.begin(); i2 < rowRange2.end(); ++i2)
-            {
-                auto col2 = J->colsIndex[i2];
-                auto val2 = J->colsValue[i2];
                 acc += val2 * getSystemLHVector()->element(col2);
             }
             acc *= fact;
