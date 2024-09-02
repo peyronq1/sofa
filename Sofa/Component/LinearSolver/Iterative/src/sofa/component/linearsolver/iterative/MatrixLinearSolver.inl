@@ -576,6 +576,7 @@ bool MatrixLinearSolver<Matrix,Vector>::addMInvJt(linearalgebra::BaseMatrix* res
 template<class Matrix, class Vector>
 bool MatrixLinearSolver<Matrix,Vector>::buildComplianceMatrix(const sofa::core::ConstraintParams* cparams, linearalgebra::BaseMatrix* result, SReal fact)
 {
+    msg_warning("buildComplianceMatrix") << "Function used.";
     JMatrixType * j_local = internalData.getLocalJ();
     j_local->clear();
     j_local->resize(result->rowSize(), getSystemMatrix()->colSize());
@@ -586,6 +587,8 @@ bool MatrixLinearSolver<Matrix,Vector>::buildComplianceMatrix(const sofa::core::
     }
 
     executeVisitor(MechanicalGetConstraintJacobianVisitor(cparams,j_local));
+
+    msg_warning("buildComplianceMatrix") << "j_local = " << *j_local;
 
     return addJMInvJt(result,j_local,fact);
 }

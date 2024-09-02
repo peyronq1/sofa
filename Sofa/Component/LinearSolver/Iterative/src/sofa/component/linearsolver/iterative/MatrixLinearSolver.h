@@ -89,6 +89,7 @@ public:
     template<typename MReal>
     JMatrixType * copyJmatrix(linearalgebra::SparseMatrix<MReal> * J)
     {
+        msg_warning("copyJmatrix") << "Function used.";
         J_local.clear();
         J_local.resize(J->rowSize(),J->colSize());
 
@@ -106,6 +107,7 @@ public:
     }
 
     void projectForceInConstraintSpace(linearalgebra::BaseVector* r,const linearalgebra::BaseVector* f) {
+        msg_warning("projectForceInConstraintSpace") << "Function used.";
         for (typename linearalgebra::SparseMatrix<Real>::LineConstIterator jit = J_local.begin(), jitend = J_local.end(); jit != jitend; ++jit) {
             auto row = jit->first;
             auto force = f->element(row);
@@ -123,6 +125,7 @@ public:
 
     JMatrixType * getLocalJ(linearalgebra::BaseMatrix * J)
     {
+        msg_warning("getLocalJ") << "Function used.";
         if (JMatrixType * j = dynamic_cast<JMatrixType *>(J))
         {
             return j;
