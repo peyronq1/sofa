@@ -143,7 +143,7 @@ void SparseLDLSolver<TMatrix,TVector,TThreadManager>::invert(Matrix& M)
 template <class TMatrix, class TVector, class TThreadManager>
 bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMatrixType* result, const JMatrixType* J, SReal fact, InvertData* data)
 {
-    msg_warning("doAddJMInvJtLocal") << "Function used.";
+    // msg_warning("doAddJMInvJtLocal") << "Function used.";
     if (!this->isComponentStateValid())
     {
         return true;
@@ -173,7 +173,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
         return true;
     }
 
-    msg_warning("doAddJMInvJtLocal") << "J is built, rows != 0.";
+    // msg_warning("doAddJMInvJtLocal") << "J is built, rows != 0.";
 
     Jlocal2global.clear();
     Jlocal2global.reserve(J->rows());
@@ -187,7 +187,7 @@ bool SparseLDLSolver<TMatrix, TVector, TThreadManager>::doAddJMInvJtLocal(ResMat
 
     if (Jlocal2global.empty())
     {
-        msg_warning("doAddJMInvJtLocal") << "J is full of 0.";
+        // msg_warning("doAddJMInvJtLocal") << "J is full of 0.";
         return true;
     }
 

@@ -139,8 +139,8 @@ public:
 
     void projectForceInConstraintSpace(linearalgebra::BaseVector* r,const linearalgebra::BaseVector* f) {
 
-        msg_warning("projectForceInConstraintSpace") << "Function used.";
-        msg_warning("projectForceInConstraintSpace") << "rowIndex.size = " << J_local.rowIndex.size();
+        // msg_warning("projectForceInConstraintSpace") << "Function used.";
+        // msg_warning("projectForceInConstraintSpace") << "rowIndex.size = " << J_local.rowIndex.size();
         for (unsigned int it_row = 0; it_row < J_local.rowIndex.size(); ++it_row)
         {
             const auto row = J_local.rowIndex[it_row];
@@ -161,10 +161,10 @@ public:
 
     JMatrixType * getLocalJ(linearalgebra::BaseMatrix * J)
     {
-        msg_warning("getLocalJ") << "Function used.";
+        // msg_warning("getLocalJ") << "Function used.";
         if (JMatrixType * j = dynamic_cast<JMatrixType *>(J))
         {
-            msg_warning("getLocalJ") << "In first if.";
+            // msg_warning("getLocalJ") << "In first if.";
             return j;
         }
         //else if (linearalgebra::SparseMatrix<double> * j = dynamic_cast<linearalgebra::SparseMatrix<double> *>(J))
