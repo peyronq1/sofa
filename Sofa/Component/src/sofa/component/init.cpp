@@ -77,6 +77,9 @@ void registerObjects(sofa::core::ObjectFactory* factory)
     factory->registerObjectsFromPlugin("Sofa.Component.StateContainer");
     factory->registerObjectsFromPlugin("Sofa.Component.Setting");
     factory->registerObjectsFromPlugin("Sofa.Component.Visual");
+    factory->registerObjectsFromPlugin("Sofa.Component.Playback");
+    factory->registerObjectsFromPlugin("Sofa.Component.SceneUtility");
+    factory->registerObjectsFromPlugin("Sofa.Component.ODESolver");
 }
 
 void init()
