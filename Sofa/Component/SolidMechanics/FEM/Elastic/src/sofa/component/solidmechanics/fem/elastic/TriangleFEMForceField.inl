@@ -42,11 +42,6 @@ TriangleFEMForceField()
     , d_thickness(initData(&d_thickness, Real(1.), "thickness", "Thickness of the elements"))
     , d_planeStrain(initData(&d_planeStrain, false, "planeStrain", "Plane strain or plane stress assumption"))
 {
-    _initialPoints.setOriginalData(&d_initialPoints);
-    f_method.setOriginalData(&d_method);
-    f_thickness.setOriginalData(&d_thickness);
-    f_planeStrain.setOriginalData(&d_planeStrain);
-
 }
 
 template <class DataTypes>
@@ -95,7 +90,7 @@ void TriangleFEMForceField<DataTypes>::init()
 
     if (d_initialPoints.getValue().size() == 0)
     {
-        const VecCoord& p = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+        const VecCoord& p = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
         d_initialPoints.setValue(p);
     }
 
@@ -251,7 +246,7 @@ void TriangleFEMForceField<DataTypes>::initSmall()
 {
     _rotatedInitialElements.resize(_indexedElements->size());
 
-    const VecCoord& pos = _initialPoints.getValue();
+    const VecCoord& pos = d_initialPoints.getValue();
     for (unsigned i = 0; i < _indexedElements->size(); ++i)
     {
         _rotations[i] = Transformation::Identity();
@@ -471,7 +466,7 @@ void TriangleFEMForceField<DataTypes>::accumulateForceLarge(VecCoord& f, const V
         f[b] += R_2_0 * Coord(F[2], F[3], 0);
         f[c] += R_2_0 * Coord(F[4], F[5], 0);
 
-        // store for re-use in matrix-vector products
+        // store for reuse in matrix-vector products
         if (implicit)
         {
             _strainDisplacements[elementIndex] = J;
@@ -558,7 +553,7 @@ void TriangleFEMForceField<DataTypes>::draw(const core::visual::VisualParams* vp
     std::vector<sofa::type::RGBAColor> colorVector;
     std::vector<sofa::type::Vec3> vertices;
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     typename VecElement::const_iterator it;
     for (it = _indexedElements->begin(); it != _indexedElements->end(); ++it)

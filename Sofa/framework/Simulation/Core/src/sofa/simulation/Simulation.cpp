@@ -23,7 +23,6 @@
 #include <sofa/simulation/PrintVisitor.h>
 #include <sofa/simulation/ExportGnuplotVisitor.h>
 #include <sofa/simulation/InitVisitor.h>
-#include <sofa/simulation/AnimateVisitor.h>
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/simulation/UpdateContextVisitor.h>
 #include <sofa/simulation/UpdateMappingVisitor.h>
@@ -230,7 +229,8 @@ void animate(Node* root, SReal dt)
 void updateVisual(Node* root)
 {
     SCOPED_TIMER("Simulation::updateVisual");
-    
+
+
     sofa::core::visual::VisualParams* vparams = sofa::core::visual::visualparams::defaultInstance();
 
     if (sofa::core::visual::VisualLoop* vloop = root->getVisualLoop())

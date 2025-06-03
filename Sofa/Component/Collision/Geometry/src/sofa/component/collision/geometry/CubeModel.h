@@ -57,9 +57,9 @@ public:
     {
         sofa::type::Vec3 minBBox, maxBBox;
         std::pair<Cube,Cube> subcells;
-        std::pair<core::CollisionElementIterator,core::CollisionElementIterator> children; ///< Note that children is only meaningfull if subcells in empty
+        std::pair<core::CollisionElementIterator,core::CollisionElementIterator> children; ///< Note that children is only meaningful if subcells in empty
 
-        // additional datas for implementing Volino's method for efficient cloth self collision 
+        // additional data for implementing Volino's method for efficient cloth self collision 
         sofa::type::Vec3 coneAxis;
         SReal coneAngle;
     };
@@ -88,6 +88,8 @@ public:
     friend class Cube;
 protected:
     CubeCollisionModel();
+
+    void drawCollisionModel(const core::visual::VisualParams* vparams) override;
 public:
     void resize(sofa::Size size) override;
 
@@ -137,8 +139,6 @@ public:
     std::pair<core::CollisionElementIterator,core::CollisionElementIterator> getExternalChildren(sofa::Index index) const override;
 
     bool isLeaf(sofa::Index index ) const override;
-
-    void draw(const core::visual::VisualParams* vparams) override;
 
     sofa::Index addCube(Cube subcellsBegin, Cube subcellsEnd);
     void updateCube(sofa::Index index);

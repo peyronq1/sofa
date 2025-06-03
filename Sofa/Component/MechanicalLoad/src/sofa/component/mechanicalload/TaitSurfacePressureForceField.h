@@ -25,8 +25,6 @@
 #include <sofa/core/behavior/ForceField.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::mechanicalload
 {
 
@@ -72,62 +70,6 @@ protected:
     virtual ~TaitSurfacePressureForceField();
 
 public:
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_p0;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_B;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_gamma;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_injectedVolume;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_maxInjectionRate;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_initialVolume;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_currentInjectedVolume;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_v0;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_currentVolume;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_currentPressure;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_currentStiffness;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<SeqTriangles> m_pressureTriangles;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_initialSurfaceArea;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_currentSurfaceArea;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_drawForceScale;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<sofa::type::RGBAColor> m_drawForceColor;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_volumeAfterTC;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_MECHANICALLOAD()
-    sofa::core::objectmodel::RenamedData<Real> m_surfaceAreaAfterTC;
-
-
     Data< Real > d_p0; ///< IN: Rest pressure when V = V0
     Data< Real > d_B; ///< IN: Bulk modulus (resistance to uniform compression)
     Data< Real > d_gamma; ///< IN: Bulk modulus (resistance to uniform compression)
@@ -141,7 +83,7 @@ public:
     Data< Real > d_currentPressure; ///< OUT: Current pressure, as computed from the last surface position
     Data< Real > d_currentStiffness; ///< OUT: dP/dV at current volume and pressure
 
-    Data< SeqTriangles > d_pressureTriangles; ///< OUT: list of triangles where a pressure is applied (mesh triangles + tesselated quads)
+    Data< SeqTriangles > d_pressureTriangles; ///< OUT: list of triangles where a pressure is applied (mesh triangles + tessellated quads)
 
     Data< Real > d_initialSurfaceArea; ///< OUT: Initial surface area, as computed from the surface rest position
     Data< Real > d_currentSurfaceArea; ///< OUT: Current surface area, as computed from the last surface position

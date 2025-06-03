@@ -119,7 +119,7 @@ void PenalityContactForceField<DataTypes>::addDForce(const sofa::core::Mechanica
         {
             Coord du = dx2[c.m2]-dx1[c.m1];
             Real dpen = - du*c.norm;
-            //if (c.pen < 0) dpen += c.pen; // start penality at distance 0
+            //if (c.pen < 0) dpen += c.pen; // start penalty at distance 0
             Real dfN = c.ks * dpen * (Real)kFactor;
             Deriv dforce = -c.norm*dfN;
             df1[c.m1]+=dforce;
@@ -277,8 +277,8 @@ void PenalityContactForceField<DataTypes>::draw(const core::visual::VisualParams
     
     using sofa::type::RGBAColor;
 
-    const VecCoord& p1 = this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& p2 = this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p1 = this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& p2 = this->mstate2->read(core::vec_id::read_access::position)->getValue();
     const type::vector<Contact>& cc = contacts.getValue();
 
     std::vector< type::Vec3 > points[4];
@@ -347,7 +347,7 @@ void PenalityContactForceField<DataTypes>::grabPoint(
 
     if (static_cast< core::objectmodel::BaseObject *>(this->mstate1) == static_cast< const core::objectmodel::BaseObject *>(tool))
     {
-        const auto& mstate2Pos = this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+        const auto& mstate2Pos = this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
         for (sofa::Index i=0; i< contactsRef.size(); i++)
         {
@@ -364,7 +364,7 @@ void PenalityContactForceField<DataTypes>::grabPoint(
     }
     else if (static_cast< core::objectmodel::BaseObject *>(this->mstate2) == static_cast< const core::objectmodel::BaseObject *>(tool))
     {
-        const auto& mstate1Pos = this->mstate1->read(core::ConstVecCoordId::position())->getValue();
+        const auto& mstate1Pos = this->mstate1->read(core::vec_id::read_access::position)->getValue();
         for (sofa::Index i=0; i< contactsRef.size(); i++)
         {
             for (sofa::Index j=0; j<index.size(); j++)

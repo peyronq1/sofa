@@ -77,14 +77,6 @@ QuadBendingFEMForceField<DataTypes>::QuadBendingFEMForceField()
   , l_topology(initLink("topology", "link to the topology container"))
 
 {
-    quadInfo.setOriginalData(&d_quadInfo);
-    vertexInfo.setOriginalData(&d_vertexInfo);
-    edgeInfo.setOriginalData(&d_edgeInfo);
-    f_method.setOriginalData(&d_method);
-    f_poisson.setOriginalData(&d_poisson);
-    f_young.setOriginalData(&d_young);
-    f_thickness.setOriginalData(&d_thickness);
-
 }
                 
 template <class DataTypes>
@@ -149,7 +141,7 @@ void QuadBendingFEMForceField<DataTypes>::initSmall(int i, Index&a, Index&b, Ind
   Coord IntlengthElement;
   Coord IntheightElement;
 
-  const  VecCoord& initialPoints = (this->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
+  const  VecCoord& initialPoints = (this->mstate->read(core::vec_id::read_access::restPosition)->getValue());
   qinfo->IntlengthElement = (initialPoints)[b] - (initialPoints)[a];
   qinfo->IntheightElement = (initialPoints)[d] - (initialPoints)[a];
   qinfo->Intcentroid = ((initialPoints)[a] + (initialPoints)[c]) / 2;
@@ -321,7 +313,7 @@ void QuadBendingFEMForceField<DataTypes>::computeBendingStrainDisplacement(Strai
 }
   
 // ------------------------------------------------------------------------------------------------------------
-// --- Compute the strain-displacement matrix (Shear componenent) where (a, b, c, d) are the coordinates of the 4 nodes of a rectangular
+// --- Compute the strain-displacement matrix (Shear component) where (a, b, c, d) are the coordinates of the 4 nodes of a rectangular
 // ------------------------------------------------------------------------------------------------------------
 template <class DataTypes>
 void QuadBendingFEMForceField<DataTypes>::computeShearStrainDisplacement(StrainDisplacement &Js, /*Index elementIndex*/ Real l, Real h/*Coord a, Coord b, Coord c, Coord d*/  )
@@ -441,7 +433,7 @@ template <class DataTypes>
 void QuadBendingFEMForceField<DataTypes>::computeElementStiffness( Stiffness &K, Index elementIndex)
 {  
   type::vector<QuadInformation>& quadInf = *(d_quadInfo.beginEdit());
-  const VecCoord& p = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+  const VecCoord& p = this->mstate->read(core::vec_id::read_access::position)->getValue();
   //QuadInformation *qinfo = &quadInf[elementIndex];
 
   Index idx0 = m_topology->getQuad(elementIndex)[0];

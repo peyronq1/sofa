@@ -33,7 +33,6 @@
 
 #include <sofa/helper/ColorMap.h>
 #include <sofa/simulation/ParallelForEach.h>
-#include <sofa/core/objectmodel/RenamedData.h>
 
 // corotational tetrahedron from
 // @InProceedings{NPF05,
@@ -54,7 +53,7 @@ namespace sofa::component::solidmechanics::fem::elastic
 template<class DataTypes>
 class TetrahedronFEMForceField;
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template<class DataTypes>
 class TetrahedronFEMForceFieldInternalData
 {
@@ -188,29 +187,8 @@ public:
     type::vector< Mat33 > m_rotations;
     const type::vector<Mat33>& getRotations() override;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<VecCoord> _initialPoints;
-
     Data< VecCoord > d_initialPoints; ///< Initial Position
     int method;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<std::string> f_method;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    DeprecatedAndRemoved _poissonRatio;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<VecReal> _youngModulus;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<VecReal> _localStiffnessFactor;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _updateStiffnessMatrix;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _assembling;
 
     Data<std::string> d_method; ///< "small", "large" (by QR), "polar" or "svd" displacements
 
@@ -218,30 +196,12 @@ public:
     Data<bool> d_updateStiffnessMatrix;
     Data<bool> d_assembling;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<Real> _plasticMaxThreshold;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<Real> _plasticYieldThreshold;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<Real> _plasticCreep;
-
     /// @name Plasticity such as "Interactive Virtual Materials", Muller & Gross, GI 2004
     /// @{
     Data<Real> d_plasticMaxThreshold;
     Data<Real> d_plasticYieldThreshold; ///< Plastic Yield Threshold (2-norm of the strain)
     Data<Real> d_plasticCreep; ///< Plastic Creep Factor * dt [0,1]. Warning this factor depends on dt.
     /// @}
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<sofa::helper::OptionsGroup> _gatherPt;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<sofa::helper::OptionsGroup> _gatherBsize;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> drawHeterogeneousTetra;
 
     Data< sofa::helper::OptionsGroup > d_gatherPt; ///< number of dof accumulated per threads during the gather operation (Only use in GPU version)
     Data< sofa::helper::OptionsGroup > d_gatherBsize; ///< number of dof accumulated per threads during the gather operation (Only use in GPU version)
@@ -258,18 +218,6 @@ public:
 
     Real prevMaxStress;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<int> _computeVonMisesStress;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<type::vector<Real> > _vonMisesPerElement;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<type::vector<Real> >  _vonMisesPerNode;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<type::vector<type::RGBAColor> > _vonMisesStressColors;
-
     Data<int> d_computeVonMisesStress; ///< compute and display von Mises stress: 0: no computations, 1: using corotational strain, 2: using full Green strain. Set listening=1
     Data<type::vector<Real> > d_vonMisesPerElement; ///< von Mises Stress per element
     Data<type::vector<Real> > d_vonMisesPerNode; ///< von Mises Stress per node
@@ -277,24 +225,6 @@ public:
 
     Real m_minVonMisesPerNode;
     Real m_maxVonMisesPerNode;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<std::string> _showStressColorMap;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<float> _showStressAlpha;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _showVonMisesStressPerNode;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _showVonMisesStressPerNodeColorMap;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _showVonMisesStressPerElement;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    core::objectmodel::RenamedData<bool> _updateStiffness;
 
     Data<std::string> d_showStressColorMap; ///< Color map used to show stress values
     Data<float> d_showStressAlpha; ///< Alpha for vonMises visualisation
@@ -304,7 +234,7 @@ public:
 
     Data<Real> d_showElementGapScale; ///< draw gap between elements (when showWireFrame is disabled) [0,1]: 0: no gap, 1: no element
 
-    Data<bool>  d_updateStiffness; ///< udpate structures (precomputed in init) using stiffness parameters in each iteration (set listening=1)
+    Data<bool>  d_updateStiffness; ///< update structures (precomputed in init) using stiffness parameters in each iteration (set listening=1)
 
     using Inherit1::l_topology;
 

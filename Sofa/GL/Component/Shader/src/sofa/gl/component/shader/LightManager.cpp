@@ -34,7 +34,6 @@ using sofa::core::visual::VisualParams ;
 using sofa::gl::component::shader::OglTexture ;
 
 using sofa::core::objectmodel::BaseContext ;
-using sofa::core::RegisterObject ;
 
 using sofa::type::Mat ;
 
@@ -43,12 +42,12 @@ using sofa::type::RGBAColor ;
 namespace sofa::gl::component::shader
 {
 
-//Register LightManager in the Object Factory
-int LightManagerClass = RegisterObject
-        ("Manage a set of lights that can cast hard and soft shadows.Soft Shadows is done using Variance Shadow Mapping "
-         "(http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/VarianceShadowMapping/Doc/VarianceShadowMapping.pdf)")
-        .add< LightManager >()
-        ;
+void registerLightManager(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Manage a set of lights that can cast hard and soft shadows.Soft Shadows is done using Variance Shadow Mapping "
+        "(http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/VarianceShadowMapping/Doc/VarianceShadowMapping.pdf)")
+        .add< LightManager >());
+}
 
 LightManager::LightManager()
     : d_shadowsEnabled(initData(&d_shadowsEnabled, (bool) false, "shadows", "Enable Shadow in the scene. (default=0)"))
@@ -99,7 +98,7 @@ void LightManager::doInitVisual(const core::visual::VisualParams* vparams)
         m_shadowShaders[i]->initVisual(vparams);
 
     ///TODO: keep trace of all active textures at the same time, with a static factory
-    ///or something like that to avoid conflics with color texture declared in the scene file.
+    ///or something like that to avoid conflicts with color texture declared in the scene file.
     type::vector<OglTexture::SPtr> sceneTextures;
     this->getContext()->get<OglTexture, type::vector<OglTexture::SPtr> >(&sceneTextures, BaseContext::SearchRoot);
 
@@ -477,7 +476,7 @@ void LightManager::restoreDefaultLight(VisualParams* vp)
 //TODO(dmarchal): Hard-coding keyboard behavior in a component is a bad idea as for several reasons:
 // the scene can be executed without a keyboard ...there is no reason the component should have a "knowledge" of keyboard
 // what will happens if multiple lighmanager are in the same scene ...
-// what will hapen if other component use the same key...
+// what will happen if other component use the same key...
 // The correct implementation consist in separatng the event code into a different class & component in
 // the SofaInteracton module.
 void LightManager::handleEvent(sofa::core::objectmodel::Event* event)

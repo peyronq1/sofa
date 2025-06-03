@@ -34,9 +34,11 @@ namespace sofa::component::collision::geometry
 using namespace sofa::type;
 using namespace sofa::defaulttype;
 
-int TetrahedronCollisionModelClass = core::RegisterObject("collision model using a tetrahedral mesh, as described in BaseMeshTopology")
-        .add< TetrahedronCollisionModel >()
-        ;
+void registerTetrahedronCollisionModel(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Collision model using a tetrahedral mesh, as described in BaseMeshTopology.")
+        .add< TetrahedronCollisionModel >());
+}
 
 TetrahedronCollisionModel::TetrahedronCollisionModel()
     : tetra(nullptr)
@@ -159,10 +161,9 @@ void TetrahedronCollisionModel::draw(const core::visual::VisualParams* vparams, 
 
 }
 
-void TetrahedronCollisionModel::draw(const core::visual::VisualParams* vparams)
+void TetrahedronCollisionModel::drawCollisionModel(const core::visual::VisualParams* vparams)
 {
-    const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
-    if (mstate && m_topology && vparams->displayFlags().getShowCollisionModels())
+    if (mstate && m_topology)
     {
         if (vparams->displayFlags().getShowWireFrame())
             vparams->drawTool()->setPolygonMode(0, true);
@@ -190,10 +191,6 @@ void TetrahedronCollisionModel::draw(const core::visual::VisualParams* vparams)
         if (vparams->displayFlags().getShowWireFrame())
             vparams->drawTool()->setPolygonMode(0, false);
     }
-    if (getPrevious()!=nullptr && vparams->displayFlags().getShowBoundingCollisionModels())
-        getPrevious()->draw(vparams);
-
-
 }
 
 void TetrahedronCollisionModel::computeBoundingTree(int maxDepth)
@@ -205,7 +202,7 @@ void TetrahedronCollisionModel::computeBoundingTree(int maxDepth)
     updateFromTopology();
 
     Vec3 minElem, maxElem;
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     for (std::size_t i=0; i<size; i++)
     {

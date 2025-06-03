@@ -27,8 +27,6 @@
 #include <map>
 #include <set>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::solidmechanics::spring
 {
 
@@ -46,10 +44,7 @@ public:
     typedef typename DataTypes::VecCoord VecCoord;
     typedef core::behavior::MechanicalState<DataTypes> MechanicalState;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_SPRING()
-    sofa::core::objectmodel::RenamedData<type::Vec<2,int>> localRange;
-
-    /// optional range of local DOF indices. Any computation involving only indices outside of this range are discarded (useful for parallelization using mesh partitionning)
+    /// optional range of local DOF indices. Any computation involving only indices outside of this range are discarded (useful for parallelization using mesh partitioning)
     Data< type::Vec<2,int> > d_localRange;
 
     /// Link to be set to the topology container in the component graph. 

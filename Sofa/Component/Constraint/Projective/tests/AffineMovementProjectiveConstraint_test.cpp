@@ -70,7 +70,7 @@ struct AffineMovementProjectiveConstraint_test : public BaseSimulationTest, Nume
     sofa::helper::RandomGenerator randomGenerator;
 
      // Create the context for the scene
-     void SetUp() override
+     void doSetUp() override
      {
          // Init simulation
          simulation = sofa::simulation::getSimulation();
@@ -132,7 +132,7 @@ struct AffineMovementProjectiveConstraint_test : public BaseSimulationTest, Nume
 
         // Compute the theoretical final positions
         VecCoord finalPos;
-        patchStruct.affineConstraint->getFinalPositions( finalPos,*patchStruct.dofs->write(core::VecCoordId::position()) );
+        patchStruct.affineConstraint->getFinalPositions( finalPos,*patchStruct.dofs->write(core::vec_id::write_access::position) );
 
 
         // Initialize
@@ -190,13 +190,13 @@ struct AffineMovementProjectiveConstraint_test : public BaseSimulationTest, Nume
 
 };
 
-// Define the list of DataTypes to instanciate
+// Define the list of DataTypes to instantiate
 using ::testing::Types;
 typedef Types<
     defaulttype::Vec3Types
-> DataTypes; // the types to instanciate.
+> DataTypes; // the types to instantiate.
 
-// Test suite for all the instanciations
+// Test suite for all the instantiations
 TYPED_TEST_SUITE(AffineMovementProjectiveConstraint_test, DataTypes);
 // first test case
 TYPED_TEST( AffineMovementProjectiveConstraint_test , testValue )

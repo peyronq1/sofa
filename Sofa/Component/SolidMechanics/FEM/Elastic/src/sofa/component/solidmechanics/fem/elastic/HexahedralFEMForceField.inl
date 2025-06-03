@@ -65,16 +65,11 @@ HexahedralFEMForceField<DataTypes>::HexahedralFEMForceField()
     _coef[5][0]=  1;		_coef[5][1]= -1;		_coef[5][2]=  1;
     _coef[6][0]=  1;		_coef[6][1]=  1;		_coef[6][2]=  1;
     _coef[7][0]= -1;		_coef[7][1]=  1;		_coef[7][2]=  1;
-
-    f_method.setOriginalData(&d_method);
-    hexahedronInfo.setOriginalData(&d_hexahedronInfo);
-
 }
 
 template <class DataTypes>
 HexahedralFEMForceField<DataTypes>::~HexahedralFEMForceField()
 {
-
 }
 
 
@@ -386,7 +381,7 @@ void HexahedralFEMForceField<DataTypes>::initLarge(const int i)
     // second vector in the plane of the two first edges
     // third vector orthogonal to first and second
 
-    const VecCoord& X0=this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& X0=this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
 
     type::Vec<8,Coord> nodes;
     for(int w=0; w<8; ++w)
@@ -486,7 +481,7 @@ void HexahedralFEMForceField<DataTypes>::accumulateForceLarge( WDataRefVecDeriv&
 template<class DataTypes>
 void HexahedralFEMForceField<DataTypes>::initPolar(const int i)
 {
-    const VecCoord& X0=this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& X0=this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
 
     type::Vec<8,Coord> nodes;
     for(int j=0; j<8; ++j)
@@ -584,15 +579,13 @@ void HexahedralFEMForceField<DataTypes>::accumulateForcePolar(WDataRefVecDeriv& 
 /////////////////////////////////////////////////
 
 template<class DataTypes>
-void HexahedralFEMForceField<DataTypes>::addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix)
+void HexahedralFEMForceField<DataTypes>::addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset)
 {
     // Build Matrix Block for this ForceField
     int i,j,n1, n2;
 
     Index node1, node2;
 
-    sofa::core::behavior::MultiMatrixAccessor::MatrixRef r = matrix->getMatrix(this->mstate);
-    const Real kFactor = (Real)sofa::core::mechanicalparams::kFactorIncludingRayleighDamping(mparams, this->rayleighStiffness.getValue());
     const type::vector<typename HexahedralFEMForceField<DataTypes>::HexahedronInformation>& hexahedronInf = d_hexahedronInfo.getValue();
 
     for(Size e=0 ; e<this->l_topology->getNbHexahedra() ; ++e)
@@ -613,7 +606,7 @@ void HexahedralFEMForceField<DataTypes>::addKToMatrix(const core::MechanicalPara
                         Coord(Ke[3*n1+2][3*n2+0],Ke[3*n1+2][3*n2+1],Ke[3*n1+2][3*n2+2])) ) * hexahedronInf[e].rotation;
                 for(i=0; i<3; i++)
                     for (j=0; j<3; j++)
-                        r.matrix->add(r.offset+3*node1+i, r.offset+3*node2+j, - tmp[i][j]*kFactor);
+                        matrix->add(offset+3*node1+i, offset+3*node2+j, - tmp[i][j]*kFact);
             }
         }
     }
@@ -670,7 +663,7 @@ void HexahedralFEMForceField<DataTypes>::draw(const core::visual::VisualParams* 
     std::vector<sofa::type::RGBAColor> colorVector;
     std::vector<sofa::type::Vec3> vertices;
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     if (vparams->displayFlags().getShowWireFrame())
     {

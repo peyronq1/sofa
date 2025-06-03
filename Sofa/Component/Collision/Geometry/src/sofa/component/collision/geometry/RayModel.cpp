@@ -29,9 +29,11 @@
 namespace sofa::component::collision::geometry
 {
 
-int RayCollisionModelClass = core::RegisterObject("Collision model representing a ray in space, e.g. a mouse click")
-        .add< RayCollisionModel >()
-        ;
+void registerRayCollisionModel(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Collision model representing a ray in space, e.g. a mouse click")
+        .add< RayCollisionModel >());
+}
 
 using namespace sofa::type;
 using namespace sofa::defaulttype;
@@ -40,7 +42,6 @@ RayCollisionModel::RayCollisionModel(SReal length)
     : d_defaultLength(initData(&d_defaultLength, length, "defaultLength", "The default length for all rays in this collision model"))
 {
     this->contactResponse.setValue("RayContact"); // use RayContact response class
-    defaultLength.setOriginalData(&d_defaultLength);
 }
 
 void RayCollisionModel::resize(sofa::Size size)
@@ -109,21 +110,6 @@ void RayCollisionModel::draw(const core::visual::VisualParams* vparams, sofa::In
 
 }
 
-void RayCollisionModel::draw(const core::visual::VisualParams* vparams)
-{
-    if (vparams->displayFlags().getShowCollisionModels())
-    {       
-        for (sofa::Index i=0; i<size; i++)
-        {
-            draw(vparams,i);
-        }
-    }
-    if (getPrevious()!=nullptr && vparams->displayFlags().getShowBoundingCollisionModels())
-    {
-        getPrevious()->draw(vparams);
-    }
-}
-
 void RayCollisionModel::computeBoundingTree(int maxDepth)
 {
     CubeCollisionModel* cubeModel = createPrevious<CubeCollisionModel>();
@@ -173,7 +159,7 @@ void RayCollisionModel::applyTranslation(double dx, double dy, double dz)
 
 const type::Vec3& Ray::origin() const
 {
-    return model->getMechanicalState()->read(core::ConstVecCoordId::position())->getValue()[index];
+    return model->getMechanicalState()->read(core::vec_id::read_access::position)->getValue()[index];
 }
 
 const type::Vec3& Ray::direction() const
@@ -188,10 +174,10 @@ SReal Ray::l() const
 
 void Ray::setOrigin(const type::Vec3& newOrigin)
 {
-    auto xData = sofa::helper::getWriteAccessor(*model->getMechanicalState()->write(core::VecCoordId::position()));
+    auto xData = sofa::helper::getWriteAccessor(*model->getMechanicalState()->write(core::vec_id::write_access::position));
     xData.wref()[index] = newOrigin;
 
-    auto xDataFree = sofa::helper::getWriteAccessor(*model->getMechanicalState()->write(core::VecCoordId::freePosition()));
+    auto xDataFree = sofa::helper::getWriteAccessor(*model->getMechanicalState()->write(core::vec_id::write_access::freePosition));
     auto& freePos = xDataFree.wref();
     freePos.resize(model->getMechanicalState()->getSize());
     freePos[index] = newOrigin;

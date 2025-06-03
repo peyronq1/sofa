@@ -26,7 +26,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ### Sofa using type double or float
 set(SOFA_FLOATING_POINT_TYPE double CACHE STRING
     "Type used for floating point values in SOFA. It actually determines:
-    - what template instanciations will be compiled (via the definition of the
+    - what template instantiations will be compiled (via the definition of the
     SOFA_FLOAT and SOFA_DOUBLE macros)
     - what is the type behind the 'SReal' typedef used throughout SOFA.")
 set_property(CACHE SOFA_FLOATING_POINT_TYPE PROPERTY STRINGS float double)
@@ -64,7 +64,7 @@ endif()
 option(SOFA_ENABLE_FAST_MATH "Enable floating-point model to fast (theoretically faster but can bring unexpected results/bugs)." OFF)
 
 ### SOFA_DEV_TOOL
-option(SOFA_WITH_DEVTOOLS "Compile with development extra features." ON)
+option(SOFA_WITH_DEVTOOLS "Compile with development extra features." OFF)
 
 # Variables to expose in configured files
 sofa_set_01(SOFA_NO_UPDATE_BBOX_ VALUE ${SOFA_NO_UPDATE_BBOX}) # build_option_bbox.h.in
@@ -85,6 +85,7 @@ set(HEADER_FILES
     ${SOFACONFIGSRC_ROOT}/config.h.in
     ${SOFACONFIGSRC_ROOT}/version.h.in
     ${SOFACONFIGSRC_ROOT}/url.h.in
+    ${SOFACONFIGSRC_ROOT}/Modules.h
 )
 set(SOURCE_FILES
     ${SOFACONFIGSRC_ROOT}/initSofaConfig.cpp # necessary to build a library
@@ -105,8 +106,8 @@ if((CMAKE_SYSTEM_NAME STREQUAL Windows) AND SOFA_USE_DEPENDENCY_PACK)
 endif()
 
 # Compile options
-# Set C++17
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+# Set C++20
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 set(SOFACONFIG_COMPILE_OPTIONS_DEBUG "")
 set(SOFACONFIG_COMPILE_OPTIONS_RELEASE "")
@@ -239,7 +240,7 @@ endif()
 ## Tracy
 option(SOFA_TRACY "Compile SOFA with the Tracy profiler client" OFF)
 if (SOFA_TRACY)
-    set(SOFA_TRACY_VERSION v0.9.1)
+    set(SOFA_TRACY_VERSION v0.11.1)
     include(FetchContent)
     option(TRACY_STATIC "Whether to build Tracy as a static library" OFF)
     FetchContent_Declare (
@@ -296,13 +297,22 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   MAP_IMPORTED_CONFIG_MINSIZEREL Release
   MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release
   )
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:RELEASE>:${SOFACONFIG_COMPILE_OPTIONS_RELEASE}>")
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${SOFACONFIG_COMPILE_OPTIONS_DEBUG}>")
-target_compile_options(${PROJECT_NAME} PUBLIC "${SOFACONFIG_COMPILE_OPTIONS}")
 
-target_link_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:RELEASE>:${SOFACONFIG_LINK_OPTIONS_RELEASE}>")
-target_link_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${SOFACONFIG_LINK_OPTIONS_DEBUG}>")
-target_link_options(${PROJECT_NAME} PUBLIC "${SOFACONFIG_LINK_OPTIONS}")
+set(is_cxx "$<COMPILE_LANGUAGE:CXX>")
+set(is_c "$<COMPILE_LANGUAGE:C>")
+set(is_c_cxx "$<OR:${is_cxx},${is_c}>")
+set(is_release "$<CONFIG:RELEASE>")
+set(is_debug "$<CONFIG:DEBUG>")
+set(is_c_cxx_release "$<AND:${is_c_cxx},${is_release}>")
+set(is_c_cxx_debug "$<AND:${is_c_cxx},${is_debug}>")
+
+target_compile_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx_release}:${SOFACONFIG_COMPILE_OPTIONS_RELEASE}>")
+target_compile_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx_debug}:${SOFACONFIG_COMPILE_OPTIONS_DEBUG}>")
+target_compile_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx}:${SOFACONFIG_COMPILE_OPTIONS}>")
+
+target_link_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx_release}:${SOFACONFIG_LINK_OPTIONS_RELEASE}>")
+target_link_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx_debug}:${SOFACONFIG_LINK_OPTIONS_DEBUG}>")
+target_link_options(${PROJECT_NAME} PUBLIC "$<${is_c_cxx}:${SOFACONFIG_LINK_OPTIONS}>")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER Sofa.Framework) # IDE folder
 

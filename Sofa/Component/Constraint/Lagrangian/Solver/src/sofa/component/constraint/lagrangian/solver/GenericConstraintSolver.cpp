@@ -60,13 +60,16 @@ void clearMultiVecId(sofa::core::objectmodel::BaseContext* ctx, const sofa::core
 
 }
 
+static constexpr GenericConstraintSolver::ResolutionMethod defaultResolutionMethod("ProjectedGaussSeidel");
+
 GenericConstraintSolver::GenericConstraintSolver()
-    : d_resolutionMethod( initData(&d_resolutionMethod, "resolutionMethod", "Method used to solve the constraint problem, among: \"ProjectedGaussSeidel\", \"UnbuiltGaussSeidel\" or \"for NonsmoothNonlinearConjugateGradient\""))
+    : d_resolutionMethod( initData(&d_resolutionMethod, defaultResolutionMethod, "resolutionMethod", ("Method used to solve the constraint problem\n" + ResolutionMethod::dataDescription()).c_str()))
     , d_maxIt(initData(&d_maxIt, 1000, "maxIterations", "maximal number of iterations of the Gauss-Seidel algorithm"))
     , d_tolerance(initData(&d_tolerance, 0.001_sreal, "tolerance", "residual error threshold for termination of the Gauss-Seidel algorithm"))
     , d_sor(initData(&d_sor, 1.0_sreal, "sor", "Successive Over Relaxation parameter (0-2)"))
+    , d_regularizationTerm(initData(&d_regularizationTerm, 0.0_sreal, "regularizationTerm", "Add regularization factor times the identity matrix to the compliance W when solving constraints"))
     , d_scaleTolerance(initData(&d_scaleTolerance, true, "scaleTolerance", "Scale the error tolerance with the number of constraints"))
-    , d_allVerified(initData(&d_allVerified, false, "allVerified", "All contraints must be verified (each constraint's error < tolerance)"))
+    , d_allVerified(initData(&d_allVerified, false, "allVerified", "All constraints must be verified (each constraint's error < tolerance)"))
     , d_newtonIterations(initData(&d_newtonIterations, 100, "newtonIterations", "Maximum iteration number of Newton (for the NonsmoothNonlinearConjugateGradient solver only)"))
     , d_multithreading(initData(&d_multithreading, false, "multithreading", "Build compliances concurrently"))
     , d_computeGraphs(initData(&d_computeGraphs, false, "computeGraphs", "Compute graphs of errors and forces during resolution"))
@@ -86,10 +89,6 @@ GenericConstraintSolver::GenericConstraintSolver()
     , current_cp(&m_cpBuffer[0])
     , last_cp(nullptr)
 {
-    sofa::helper::OptionsGroup m_newoptiongroup{"ProjectedGaussSeidel","UnbuiltGaussSeidel", "NonsmoothNonlinearConjugateGradient"};
-    m_newoptiongroup.setSelectedItem("ProjectedGaussSeidel");
-    d_resolutionMethod.setValue(m_newoptiongroup);
-
     addAlias(&d_maxIt, "maxIt");
 
     d_graphErrors.setWidget("graph");
@@ -115,22 +114,6 @@ GenericConstraintSolver::GenericConstraintSolver()
 
     d_maxIt.setRequired(true);
     d_tolerance.setRequired(true);
-
-    maxIt.setOriginalData(&d_maxIt);
-    tolerance.setOriginalData(&d_tolerance);
-    sor.setOriginalData(&d_sor);
-    scaleTolerance.setOriginalData(&d_scaleTolerance);
-    allVerified.setOriginalData(&d_allVerified);
-    computeGraphs.setOriginalData(&d_computeGraphs);
-    graphErrors.setOriginalData(&d_graphErrors);
-    graphConstraints.setOriginalData(&d_graphConstraints);
-    graphForces.setOriginalData(&d_graphForces);
-    graphViolations.setOriginalData(&d_graphViolations);
-    currentNumConstraints.setOriginalData(&d_currentNumConstraints);
-    currentNumConstraintGroups.setOriginalData(&d_currentNumConstraintGroups);
-    currentIterations.setOriginalData(&d_currentIterations);
-    currentError.setOriginalData(&d_currentError);
-    reverseAccumulateOrder.setOriginalData(&d_reverseAccumulateOrder);
 }
 
 GenericConstraintSolver::~GenericConstraintSolver()
@@ -159,7 +142,8 @@ void GenericConstraintSolver::init()
 
     if(d_newtonIterations.isSet())
     {
-        if (d_resolutionMethod.getValue().getSelectedId() != 2)
+        static constexpr ResolutionMethod NonsmoothNonlinearConjugateGradient("NonsmoothNonlinearConjugateGradient");
+        if (d_resolutionMethod.getValue() != NonsmoothNonlinearConjugateGradient)
         {
             msg_warning() << "data \"newtonIterations\" is not only taken into account when using the NonsmoothNonlinearConjugateGradient solver";
         }
@@ -213,6 +197,7 @@ bool GenericConstraintSolver::buildSystem(const core::ConstraintParams *cParams,
     // suppress the constraints that are on DOFS currently concerned by projective constraint
     applyProjectiveConstraintOnConstraintMatrix(cParams);
 
+    //clear and/or resize based on the number of constraints
     current_cp->clear(numConstraints);
 
     getConstraintViolation(cParams, &current_cp->dFree);
@@ -225,15 +210,15 @@ bool GenericConstraintSolver::buildSystem(const core::ConstraintParams *cParams,
     }
 
     // Resolution depending on the method selected
-    switch ( d_resolutionMethod.getValue().getSelectedId() )
+    switch ( d_resolutionMethod.getValue() )
     {
-        case 0: // ProjectedGaussSeidel
-        case 2: // NonsmoothNonlinearConjugateGradient
+        case ResolutionMethod("ProjectedGaussSeidel"):
+        case ResolutionMethod("NonsmoothNonlinearConjugateGradient"):
         {
             buildSystem_matrixAssembly(cParams);
             break;
         }
-        case 1: // UnbuiltGaussSeidel
+        case ResolutionMethod("UnbuiltGaussSeidel"):
         {
             buildSystem_matrixFree(numConstraints);
             break;
@@ -243,6 +228,18 @@ bool GenericConstraintSolver::buildSystem(const core::ConstraintParams *cParams,
     }
 
     return true;
+}
+
+void GenericConstraintSolver::addRegularization(linearalgebra::BaseMatrix& W)
+{
+    const SReal regularization =  d_regularizationTerm.getValue();
+    if (regularization>std::numeric_limits<SReal>::epsilon())
+    {
+        for (int i=0; i<W.rowSize(); ++i)
+        {
+            W.add(i,i,regularization);
+        }
+    }
 }
 
 void GenericConstraintSolver::buildSystem_matrixFree(unsigned int numConstraints)
@@ -301,6 +298,10 @@ void GenericConstraintSolver::buildSystem_matrixFree(unsigned int numConstraints
     current_cp->change_sequence = false;
     if(current_cp->constraints_sequence.size() == nbObjects)
         current_cp->change_sequence=true;
+
+    addRegularization(current_cp->W);
+    addRegularization(current_cp->Wdiag);
+
 }
 
 GenericConstraintSolver::ComplianceWrapper::ComplianceMatrixType& GenericConstraintSolver::
@@ -369,6 +370,7 @@ void GenericConstraintSolver::buildSystem_matrixAssembly(const core::ConstraintP
             compliance.assembleMatrix();
         });
 
+    addRegularization(current_cp->W);
     dmsg_info() << " computeCompliance_done "  ;
 }
 
@@ -429,10 +431,9 @@ bool GenericConstraintSolver::solveSystem(const core::ConstraintParams * /*cPara
 
 
     // Resolution depending on the method selected
-    switch ( d_resolutionMethod.getValue().getSelectedId() )
+    switch ( d_resolutionMethod.getValue())
     {
-        // ProjectedGaussSeidel
-        case 0: {
+        case ResolutionMethod("ProjectedGaussSeidel"): {
             if (notMuted())
             {
                 std::stringstream tmp;
@@ -445,14 +446,12 @@ bool GenericConstraintSolver::solveSystem(const core::ConstraintParams * /*cPara
             current_cp->gaussSeidel(0, this);
             break;
         }
-        // UnbuiltGaussSeidel
-        case 1: {
+        case ResolutionMethod("UnbuiltGaussSeidel"): {
             SCOPED_TIMER_VARNAME(unbuiltGaussSeidelTimer, "ConstraintsUnbuiltGaussSeidel");
             current_cp->unbuiltGaussSeidel(0, this);
             break;
         }
-        // NonsmoothNonlinearConjugateGradient
-        case 2: {
+        case ResolutionMethod("NonsmoothNonlinearConjugateGradient"): {
             current_cp->NNCG(this, d_newtonIterations.getValue());
             break;
         }
@@ -531,8 +530,6 @@ void GenericConstraintSolver::applyMotionCorrection(
 
 void GenericConstraintSolver::computeAndApplyMotionCorrection(const core::ConstraintParams* cParams, MultiVecId res1, MultiVecId res2) const
 {
-    SCOPED_TIMER("Compute And Apply Motion Correction");
-
     static constexpr auto supportedCorrections = {
         sofa::core::ConstraintOrder::POS_AND_VEL,
         sofa::core::ConstraintOrder::POS,
@@ -544,11 +541,11 @@ void GenericConstraintSolver::computeAndApplyMotionCorrection(const core::Constr
         for (const auto& constraintCorrection : filteredConstraintCorrections())
         {
             {
-                SCOPED_TIMER("ComputeCorrection");
+                SCOPED_TIMER("doComputeCorrection");
                 constraintCorrection->computeMotionCorrectionFromLambda(cParams, this->getDx(), &current_cp->f);
             }
 
-            SCOPED_TIMER("ApplyCorrection");
+            SCOPED_TIMER("doApplyCorrection");
             applyMotionCorrection(cParams, res1, res2, constraintCorrection);
         }
     }
@@ -619,8 +616,10 @@ sofa::core::MultiVecDerivId GenericConstraintSolver::getDx() const
     return m_dxId;
 }
 
-
-int GenericConstraintSolverClass = core::RegisterObject("A Generic Constraint Solver using the Linear Complementarity Problem formulation to solve Constraint based components")
-        .add< GenericConstraintSolver >();
+void registerGenericConstraintSolver(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("A Generic Constraint Solver using the Linear Complementarity Problem formulation to solve Constraint based components")
+        .add< GenericConstraintSolver >());
+}
 
 } //namespace sofa::component::constraint::lagrangian::solver

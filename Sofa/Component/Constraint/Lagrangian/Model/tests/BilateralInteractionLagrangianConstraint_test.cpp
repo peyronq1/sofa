@@ -127,7 +127,7 @@ struct BilateralInteractionLangrangianConstraint_test : public NumericTest<>
     }
 
 
-    /// This component requires to be used in conjonction with MechanicalObjects.
+    /// This component requires to be used in conjunction with MechanicalObjects.
     void checkMstateRequiredAssumption(){
         EXPECT_MSG_EMIT(Error) ;
 
@@ -219,7 +219,7 @@ bool BilateralInteractionLangrangianConstraint_test<Vec3Types>::test_Vec3Constra
     if(meca.size()==2)
     {
         for(unsigned int i=0; i<meca.size(); i++)
-            points[i] = meca[i]->read(core::ConstVecCoordId::position())->getValue()[0];
+            points[i] = meca[i]->read(core::vec_id::read_access::position)->getValue()[0];
     }
 
     component::constraintset::GenericConstraintSolver *test;
@@ -233,14 +233,14 @@ bool BilateralInteractionLangrangianConstraint_test<Vec3Types>::test_Vec3Constra
     return false;
 }
 
-// Define the list of DataTypes to instanciate
+// Define the list of DataTypes to instantiate
 using ::testing::Types;
 typedef Types<Vec3Types
               ,Rigid3dTypes
  //
-> DataTypes; // the types to instanciate.
+> DataTypes; // the types to instantiate.
 
-// Test suite for all the instanciations
+// Test suite for all the instantiations
 TYPED_TEST_SUITE(BilateralInteractionLangrangianConstraint_test, DataTypes);
 
 //TODO(dmarchal): Needs a serious refactor !!!

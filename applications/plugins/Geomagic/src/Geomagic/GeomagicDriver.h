@@ -34,12 +34,13 @@
 #include <HD/hd.h>
 #endif
 
-namespace sofa::component::controller
+namespace geomagic
 {
 
 
 class GeomagicVisualModel;
 
+using namespace sofa::component::controller;
 
 /**
 * Class providing a driver API to handle Geomagic haptic device and the servo loop scheduler.
@@ -84,7 +85,7 @@ public:
     /// Public method to init tool. Can be called from thirdparty if @sa d_manualStart is set to true
     virtual void initDevice();
     
-    /// Method to clear sheduler and free device. Called by default at driver destruction
+    /// Method to clear scheduler and free device. Called by default at driver destruction
     virtual void clearDevice();
 
 
@@ -117,7 +118,7 @@ public:
 
     //Output Data
     Data<Coord> d_posDevice; ///< position of the base of the part of the device
-    Data<type::Vec6> d_angle; ///< Angluar values of joint (rad)
+    Data<type::Vec6> d_angle; ///< Angular values of joint (rad)
     Data<bool> d_button_1; ///< Button state 1
     Data<bool> d_button_2; ///< Button state 2
     
@@ -152,4 +153,4 @@ public:
     std::vector< SHDSchedulerHandle > m_hStateHandles; ///< List of ref to the workers scheduled
 };
 
-} // namespace sofa::component::controller
+} // namespace geomagic

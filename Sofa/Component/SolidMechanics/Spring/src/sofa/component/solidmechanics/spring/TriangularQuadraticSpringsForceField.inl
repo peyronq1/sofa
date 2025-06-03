@@ -34,7 +34,7 @@ template< class DataTypes>
 void TriangularQuadraticSpringsForceField<DataTypes>::applyEdgeCreation(Index edgeIndex, EdgeRestInformation &ei, const core::topology::Edge &, const sofa::type::vector<Index> &, const sofa::type::vector<SReal> &)
 {
     // store the rest length of the edge created
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
 
     const auto& e = this->m_topology->getEdge(edgeIndex);
     const auto& n0 = DataTypes::getCPos(x[e[0]]);
@@ -121,20 +121,10 @@ template <class DataTypes> TriangularQuadraticSpringsForceField<DataTypes>::Tria
     , d_edgeInfo(initData(&d_edgeInfo, "edgeInfo", "Internal edge data"))
     , m_topology(nullptr)
 {
-    _initialPoints.setOriginalData(&d_initialPoints);
-    f_poissonRatio.setOriginalData(&d_poissonRatio);
-    f_youngModulus.setOriginalData(&d_youngModulus);
-    f_dampingRatio.setOriginalData(&d_dampingRatio);
-    f_useAngularSprings.setOriginalData(&d_useAngularSprings);
-    triangleInfo.setOriginalData(&d_triangleInfo);
-    edgeInfo.setOriginalData(&d_edgeInfo);
-
-
 }
 
 template <class DataTypes> TriangularQuadraticSpringsForceField<DataTypes>::~TriangularQuadraticSpringsForceField()
 {
-
 }
 
 template <class DataTypes> void TriangularQuadraticSpringsForceField<DataTypes>::init()
@@ -178,7 +168,7 @@ template <class DataTypes> void TriangularQuadraticSpringsForceField<DataTypes>:
     if (d_initialPoints.getValue().size() == 0)
     {
         // get restPosition
-        const VecCoord& p = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+        const VecCoord& p = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
         d_initialPoints.setValue(p);
     }
     unsigned int i;
@@ -303,7 +293,7 @@ void TriangularQuadraticSpringsForceField<DataTypes>::addDForce(const core::Mech
     type::vector<typename TriangularQuadraticSpringsForceField<DataTypes>::EdgeRestInformation>& edgeInf = *(d_edgeInfo.beginEdit());
 
     assert(this->mstate);
-    const VecDeriv& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecDeriv& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
 
     Deriv deltax,res;
@@ -435,7 +425,7 @@ void TriangularQuadraticSpringsForceField<DataTypes>::draw(const core::visual::V
     if (vparams->displayFlags().getShowWireFrame())
         vparams->drawTool()->setPolygonMode(0, true);
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     const size_t nbTriangles=m_topology->getNbTriangles();
     std::vector<sofa::type::Vec3> vertices;
     std::vector<sofa::type::RGBAColor> colors;

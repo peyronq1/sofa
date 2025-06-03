@@ -478,11 +478,11 @@ void MeshTopology::QuadUpdate::doUpdate()
 using namespace sofa::defaulttype;
 using core::topology::BaseMeshTopology;
 
-
-int MeshTopologyClass = core::RegisterObject("Generic mesh topology")
-        .addAlias("Mesh")
-        .add< MeshTopology >()
-        ;
+void registerMeshTopology(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Generic constant topology loaded from a mesh file.")
+        .add< MeshTopology >());
+}
 
 MeshTopology::MeshTopology()
     : d_seqPoints(initData(&d_seqPoints, "position", "List of point positions"))
@@ -492,6 +492,7 @@ MeshTopology::MeshTopology()
     , d_seqTetrahedra(initData(&d_seqTetrahedra, "tetrahedra", "List of tetrahedron indices"))
     , d_seqHexahedra(initData(&d_seqHexahedra, "hexahedra", "List of hexahedron indices"))
     , d_seqUVs(initData(&d_seqUVs, "uv", "List of uv coordinates"))
+    , d_computeAllBuffers(initData(&d_computeAllBuffers, false, "computeAllBuffers", "Option to compute all crossed topology buffers at init. False by default"))
     , nbPoints(0)
     , validTetrahedra(false), validHexahedra(false)
     , revision(0)
@@ -507,24 +508,10 @@ MeshTopology::MeshTopology()
     addAlias(&d_seqTetrahedra, "tetras");
     addAlias(&d_seqHexahedra, "hexas");
     addAlias(&d_seqUVs, "texcoords");
-
-    seqPoints.setOriginalData(&d_seqPoints);
-    seqEdges.setOriginalData(&d_seqEdges);
-    seqTriangles.setOriginalData(&d_seqTriangles);
-    seqQuads.setOriginalData(&d_seqQuads);
-    seqTetrahedra.setOriginalData(&d_seqTetrahedra);
-    seqHexahedra.setOriginalData(&d_seqHexahedra);
-    seqUVs.setOriginalData(&d_seqUVs);
-    _drawEdges.setOriginalData(&d_drawEdges);
-    _drawTriangles.setOriginalData(&d_drawTriangles);
-    _drawQuads.setOriginalData(&d_drawQuads);
-    _drawTetra.setOriginalData(&d_drawTetra);
-    _drawHexa.setOriginalData(&d_drawHexa);
 }
 
 void MeshTopology::init()
 {
-
     BaseMeshTopology::init();
 
     const auto hexahedra = sofa::helper::getReadAccessor(d_seqHexahedra);
@@ -532,7 +519,6 @@ void MeshTopology::init()
     const auto quads = sofa::helper::getReadAccessor(d_seqQuads);
     const auto triangles = sofa::helper::getReadAccessor(d_seqTriangles);
     const auto edges = sofa::helper::getReadAccessor(d_seqEdges);
-
 
     // looking for upper topology
     if (!hexahedra.empty())
@@ -548,6 +534,11 @@ void MeshTopology::init()
     else
         m_upperElementType = sofa::geometry::ElementType::POINT;
 
+    // If true, will compute all crossed element buffers such as triangleAroundEdges, EdgesIntriangle, etc.
+    if (d_computeAllBuffers.getValue())
+    {
+        computeCrossElementBuffers();
+    }
 
     // compute the number of points, if the topology is charged from the scene or if it was loaded from a MeshLoader without any points data.
     if (nbPoints==0)
@@ -575,6 +566,7 @@ void MeshTopology::init()
 
         nbPoints = n;
     }
+
 
     if(edges.empty() )
     {
@@ -605,6 +597,72 @@ void MeshTopology::init()
         const QuadUpdate::SPtr quadUpdate = sofa::core::objectmodel::New<QuadUpdate>(this);
         quadUpdate->setName("quadUpdate");
         this->addSlave(quadUpdate);
+    }
+}
+
+void MeshTopology::computeCrossElementBuffers()
+{
+    const auto hexahedra = sofa::helper::getReadAccessor(d_seqHexahedra);
+    const auto tetrahedra = sofa::helper::getReadAccessor(d_seqTetrahedra);
+    const auto quads = sofa::helper::getReadAccessor(d_seqQuads);
+    const auto triangles = sofa::helper::getReadAccessor(d_seqTriangles);
+    const auto edges = sofa::helper::getReadAccessor(d_seqEdges);
+
+    if (!hexahedra.empty()) // Create hexahedron cross element buffers.
+    {
+        createHexahedraAroundVertexArray();
+
+        if (!quads.empty())
+        {
+            createQuadsInHexahedronArray();
+            createHexahedraAroundQuadArray();
+        }
+
+        if (!edges.empty())
+        {
+            createEdgesInHexahedronArray();
+            createHexahedraAroundEdgeArray();
+        }
+    }
+    if (!tetrahedra.empty()) // Create tetrahedron cross element buffers.
+    {
+        createTetrahedraAroundVertexArray();
+
+        if (!triangles.empty())
+        {
+            createTrianglesInTetrahedronArray();
+            createTetrahedraAroundTriangleArray();
+        }
+
+        if (!edges.empty())
+        {
+            createEdgesInTetrahedronArray();
+            createTetrahedraAroundEdgeArray();
+        }
+    }
+    if (!quads.empty()) // Create triangle cross element buffers.
+    {
+        createQuadsAroundVertexArray();
+
+        if (!edges.empty())
+        {
+            createEdgesInQuadArray();
+            createQuadsAroundEdgeArray();
+        }
+    }
+    if (!triangles.empty()) // Create triangle cross element buffers.
+    {
+        createTrianglesAroundVertexArray();
+
+        if (!edges.empty())
+        {
+            createEdgesInTriangleArray();
+            createTrianglesAroundEdgeArray();
+        }
+    }
+    if (!edges.empty())
+    {
+        createEdgesAroundVertexArray();
     }
 }
 
@@ -2362,7 +2420,7 @@ bool MeshTopology::checkConnexity()
 
     if (elemAll.size() != nbr)
     {
-        msg_error() << "CheckConnexity: elements are missings. There is more than one connexe component.";
+        msg_error() << "CheckConnexity: elements are missing. There is more than one connexe component.";
         return false;
     }
 

@@ -37,10 +37,6 @@ FixedRotationProjectiveConstraint<DataTypes>::FixedRotationProjectiveConstraint(
       d_fixedYRotation(initData(&d_fixedYRotation, false, "FixedYRotation", "Prevent Rotation around Y axis")),
       d_fixedZRotation(initData(&d_fixedZRotation, false, "FixedZRotation", "Prevent Rotation around Z axis"))
 {
-          FixedXRotation.setOriginalData(&d_fixedXRotation);
-          FixedYRotation.setOriginalData(&d_fixedYRotation);
-          FixedZRotation.setOriginalData(&d_fixedZRotation);
-
 }
 
 
@@ -56,7 +52,7 @@ void FixedRotationProjectiveConstraint<DataTypes>::init()
     this->core::behavior::ProjectiveConstraintSet<DataTypes>::init();
 
     // Retrieves mechanical state
-    VecCoord x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    VecCoord x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     // Stores initial orientation for each vertex
     previousOrientation.resize(x.size());

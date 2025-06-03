@@ -32,8 +32,6 @@
 #include <sofa/helper/decompose.h>
 #include <sofa/helper/OptionsGroup.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::solidmechanics::fem::elastic
 {
 
@@ -116,31 +114,6 @@ public:
 
     int method;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<std::string> f_method;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<Real> f_poissonRatio;
-
-    SOFA_ATTRIBUTE_DISABLED("", "v24.12", "Use d_youngModulus instead") DeprecatedAndRemoved f_youngModulus;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<bool> f_updateStiffnessMatrix;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData< sofa::helper::OptionsGroup >  _gatherPt;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData< sofa::helper::OptionsGroup >  _gatherBsize;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<bool> f_drawing;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<Real> f_drawPercentageOffset;
-
-
-
     Data<std::string> d_method; ///< "large" or "polar" or "small" displacements
     Data<bool> d_updateStiffnessMatrix;
     Data< sofa::helper::OptionsGroup > d_gatherPt; ///< number of dof accumulated per threads during the gather operation (Only use in GPU version)
@@ -162,18 +135,15 @@ public:
     void addDForce (const core::MechanicalParams* mparams, DataVecDeriv& df,
                             const DataVecDeriv& dx) override;
 
-    SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/,
-                                     const DataVecCoord&  /* x */) const override;
-
-    // getPotentialEnergy is implemented for polar method
-    SReal getPotentialEnergy(const core::MechanicalParams*) const override;
+    SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;
 
     const Transformation& getElementRotation(const sofa::Index elemidx);
 
     void getNodeRotation(Transformation& R, sofa::Index nodeIdx) ;
     void getRotations(linearalgebra::BaseMatrix * rotations,int offset = 0) override ;
 
-    void addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    using Inherit1::addKToMatrix;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
     void buildStiffnessMatrix(core::behavior::StiffnessMatrix* matrix) override;
     void buildDampingMatrix(core::behavior::DampingMatrix* /* matrices */) override {}
 
@@ -196,9 +166,6 @@ protected:
     typedef type::Mat<24, 24, Real> ElementStiffness;
     typedef type::vector<ElementStiffness> VecElementStiffness;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<VecElementStiffness> _elementStiffnesses;
-
     Data<VecElementStiffness> d_elementStiffnesses; ///< Stiffness matrices per element (K_i)
 
     typedef std::pair<int,Real> Col_Value;
@@ -208,9 +175,6 @@ protected:
     SReal m_potentialEnergy;
 
     topology::container::grid::SparseGridTopology* _sparseGrid;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<VecCoord> _initialPoints;
 
     Data< VecCoord > d_initialPoints; ///< Initial Position
 

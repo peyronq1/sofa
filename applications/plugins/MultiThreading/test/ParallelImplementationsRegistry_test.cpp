@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 *                 SOFA, Simulation Open-Framework Architecture                *
 *                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
@@ -19,16 +19,28 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <gtest/gtest.h>
-#include <MultiThreading/initMultiThreading.h>
 #include <MultiThreading/ParallelImplementationsRegistry.h>
+#include <MultiThreading/initMultiThreading.h>
+#include <gtest/gtest.h>
+#include <sofa/Modules.h>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/simpleapi/SimpleApi.h>
+#include <sofa/testing/ScopedPlugin.h>
 
 namespace multithreading
 {
 
 TEST(ParallelImplementationsRegistry, existInObjectFactory)
 {
+    // sequential versions will be added to the ObjectFactory
+    const auto plugins = sofa::testing::makeScopedPlugin({
+        Sofa.Component.LinearSolver.Iterative,
+        Sofa.Component.Collision.Detection.Algorithm,
+        Sofa.Component.SolidMechanics.FEM.Elastic,
+        Sofa.Component.Mapping.Linear,
+        "MultiThreading"
+    });
+
     const auto implementations = ParallelImplementationsRegistry::getImplementations();
 
     for (const auto& [seq, par] : implementations)
@@ -40,4 +52,5 @@ TEST(ParallelImplementationsRegistry, existInObjectFactory)
         EXPECT_TRUE(sofa::core::ObjectFactory::getInstance()->hasCreator(par)) << par;
     }
 }
+
 }

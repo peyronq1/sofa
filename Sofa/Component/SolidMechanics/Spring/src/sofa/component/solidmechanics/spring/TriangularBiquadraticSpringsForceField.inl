@@ -47,7 +47,7 @@ void TriangularBiquadraticSpringsForceField<DataTypes>::applyTriangleCreation(In
     typename DataTypes::Real area,restSquareLength[3],cotangent[3];
     typename DataTypes::Real lambda=getLambda();
     typename DataTypes::Real mu=getMu();
-    const typename DataTypes::VecCoord restPosition=this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const typename DataTypes::VecCoord restPosition=this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
     helper::WriteOnlyAccessor< Data< type::vector<EdgeRestInformation> > > edgeInf = d_edgeInfo;
 
     ///describe the indices of the 3 triangle vertices
@@ -115,7 +115,7 @@ void TriangularBiquadraticSpringsForceField<DataTypes>::applyEdgeCreation(Index 
 
 {
     // store the rest length of the edge created
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
 
     const auto& e = this->m_topology->getEdge(edgeIndex);
     const auto& n0 = DataTypes::getCPos(x[e[0]]);
@@ -141,16 +141,6 @@ template <class DataTypes> TriangularBiquadraticSpringsForceField<DataTypes>::Tr
     , l_topology(initLink("topology", "link to the topology container"))
     , m_topology(nullptr)
 {
-    triangleInfo.setOriginalData(&d_triangleInfo);
-    edgeInfo.setOriginalData(&d_edgeInfo);
-    _initialPoints.setOriginalData(&d_initialPoints);
-    f_poissonRatio.setOriginalData(&d_poissonRatio);
-    f_youngModulus.setOriginalData(&d_youngModulus);
-    f_dampingRatio.setOriginalData(&d_dampingRatio);
-    f_useAngularSprings.setOriginalData(&d_useAngularSprings);
-    f_compressible.setOriginalData(&d_compressible);
-    f_stiffnessMatrixRegularizationWeight.setOriginalData(&d_stiffnessMatrixRegularizationWeight);
-
 }
 
 template <class DataTypes> TriangularBiquadraticSpringsForceField<DataTypes>::~TriangularBiquadraticSpringsForceField()
@@ -195,7 +185,7 @@ template <class DataTypes> void TriangularBiquadraticSpringsForceField<DataTypes
     // get restPosition
     if (d_initialPoints.getValue().size() == 0)
     {
-        const VecCoord& p = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+        const VecCoord& p = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
         d_initialPoints.setValue(p);
     }
     unsigned int i;
@@ -556,7 +546,7 @@ void TriangularBiquadraticSpringsForceField<DataTypes>::draw(const core::visual:
     if (vparams->displayFlags().getShowWireFrame())
         vparams->drawTool()->setPolygonMode(0, true);
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     const size_t nbTriangles=m_topology->getNbTriangles();
 
     std::vector<sofa::type::Vec3> vertices;

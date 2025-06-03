@@ -1123,13 +1123,12 @@ void SofaPhysicsSimulation::calcProjection()
     xFactor *= 0.01;
     yFactor *= 0.01;
 
-    //std::cout << xNear << " " << yNear << std::endl;
-
-    double zForeground = -vparams->zNear() - offset;
-    double zBackground = -vparams->zFar() + offset;
-
     if (currentCamera->getCameraType() == sofa::core::visual::VisualParams::PERSPECTIVE_TYPE)
-        gluPerspective(currentCamera->getFieldOfView(), (double) width / (double) height, vparams->zNear(), vparams->zFar());
+    {
+        gluPerspective(currentCamera->getFieldOfView(),
+                       (double) width / (double) height,
+                       vparams->zNear(),vparams->zFar());
+    }
     else
     {
         double ratio = vparams->zFar() / (vparams->zNear() * 20);
@@ -1138,20 +1137,10 @@ void SofaPhysicsSimulation::calcProjection()
         {
             ratio = -300 * (tcenter.norm2()) / tcenter[2];
         }
-        glOrtho((-xNear * xFactor) * ratio, (xNear * xFactor) * ratio, (-yNear
-                * yFactor) * ratio, (yNear * yFactor) * ratio,
+        glOrtho((-xNear * xFactor) * ratio, (xNear * xFactor) * ratio,
+                (-yNear * yFactor) * ratio, (yNear * yFactor) * ratio,
                 vparams->zNear(), vparams->zFar());
     }
-
-    double xForeground = -zForeground * xNear / vparams->zNear();
-    double yForeground = -zForeground * yNear / vparams->zNear();
-    double xBackground = -zBackground * xNear / vparams->zNear();
-    double yBackground = -zBackground * yNear / vparams->zNear();
-
-    xForeground *= xFactor;
-    yForeground *= yFactor;
-    xBackground *= xFactor;
-    yBackground *= yFactor;
 
     glGetDoublev(GL_PROJECTION_MATRIX,lastProjectionMatrix);
 

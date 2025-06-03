@@ -74,7 +74,7 @@ struct BarycentricMapperTriangleSetTopologyTest :  public BaseTest, public Baryc
     typename Out::VecCoord m_out;
     TriangleSetTopologyContainer::SPtr m_topology;
 
-    void SetUp() override
+    void doSetUp() override
     {
         m_in.push_back(Vec3(0.5, 1.5, 0.0));
         m_in.push_back(Vec3(1.5, 0.0, 2.5));
@@ -101,10 +101,10 @@ struct BarycentricMapperTriangleSetTopologyTest :  public BaseTest, public Baryc
         const Node::SPtr nodeMapping = node->createChild("nodeToMap");
         const TriangleSetTopologyContainer::SPtr triangleContainer = New<TriangleSetTopologyContainer>();
         const TetrahedronSetTopologyContainer::SPtr tetraContainer = New<TetrahedronSetTopologyContainer>();
-        const MechanicalObject<Vec3Types>::SPtr mecanical = New<MechanicalObject<Vec3Types>>();
+        const MechanicalObject<Vec3Types>::SPtr mechanical = New<MechanicalObject<Vec3Types>>();
 
         node->addObject(tetraContainer);
-        node->addObject(mecanical);
+        node->addObject(mechanical);
         node->addChild(nodeMapping);
         nodeMapping->addObject(triangleContainer);
         nodeMapping->addObject(thisObject);

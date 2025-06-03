@@ -30,13 +30,14 @@
 namespace sofa::component::topology::container::dynamic
 {
 
-using namespace std;
 using namespace sofa::type;
 using namespace sofa::defaulttype;
 
-int DynamicSparseGridTopologyContainerClass = core::RegisterObject ( "Hexahedron set topology container" )
-        .add< DynamicSparseGridTopologyContainer >()
-        ;
+void registerDynamicSparseGridTopologyContainer(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Dynamic sparse grid geometry container.")
+        .add< DynamicSparseGridTopologyContainer >());
+}
 
 DynamicSparseGridTopologyContainer::DynamicSparseGridTopologyContainer()
     : d_resolution (initData (&d_resolution, type::Vec3i (0, 0, 0 ), "resolution", "voxel grid resolution" ) )
@@ -49,13 +50,6 @@ DynamicSparseGridTopologyContainer::DynamicSparseGridTopologyContainer()
     d_valuesIndexedInRegularGrid.setDisplayed(false);
     d_valuesIndexedInTopology.setDisplayed(false);
     d_idInRegularGrid2IndexInTopo.setDisplayed(false);
-
-    resolution.setOriginalData(&d_resolution);
-    valuesIndexedInRegularGrid.setOriginalData(&d_valuesIndexedInRegularGrid);
-    valuesIndexedInTopology.setOriginalData(&d_valuesIndexedInTopology);
-    idxInRegularGrid.setOriginalData(&d_idxInRegularGrid);
-    idInRegularGrid2IndexInTopo.setOriginalData(&d_idInRegularGrid2IndexInTopo);
-    voxelSize.setOriginalData(&d_voxelSize);
 }
 
 void DynamicSparseGridTopologyContainer::init()
@@ -78,7 +72,7 @@ void DynamicSparseGridTopologyContainer::init()
 
     for( unsigned int i = 0; i < iirg.size(); i++)
     {
-        idrg2tpo.insert( make_pair( iirg[i], i ));
+        idrg2tpo.insert( std::make_pair( iirg[i], i ));
     }
 
     // Init values

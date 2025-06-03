@@ -34,7 +34,7 @@
 namespace sofa::component::linearsolver::direct
 {
 
-//defaut structure for a LDL factorization
+//default structure for a LDL factorization
 template<class VecInt,class VecReal>
 class SparseLDLImplInvertData : public MatrixInvertData {
 public :
@@ -166,7 +166,7 @@ public :
 protected :
 
     Data<bool> d_precomputeSymbolicDecomposition; ///< If true the solver will reuse the precomputed symbolic decomposition. Otherwise it will recompute it at each step.
-    core::objectmodel::lifecycle::DeprecatedData d_applyPermutation{this, "v24.06", "v24.12", "applyPermutation", "Ordering method is now defined using ordering components"};
+    core::objectmodel::lifecycle::RemovedData d_applyPermutation{this, "v24.06", "v24.12", "applyPermutation", "Ordering method is now defined using ordering components"};
     Data<int> d_L_nnz; ///< Number of non-zero values in the lower triangular matrix of the factorization. The lower, the faster the system is solved.
 
 
@@ -333,7 +333,7 @@ protected :
             }
         }
 
-        // split the bloc diag in data->Bdiag
+        // split the block diag in data->Bdiag
 
         if (data->new_factorization_needed  || !d_precomputeSymbolicDecomposition.getValue() )
         {

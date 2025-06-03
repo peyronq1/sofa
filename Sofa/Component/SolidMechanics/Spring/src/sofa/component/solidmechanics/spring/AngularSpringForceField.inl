@@ -40,12 +40,6 @@ AngularSpringForceField<DataTypes>::AngularSpringForceField()
     , d_drawSpring(initData(&d_drawSpring, false, "drawSpring", "draw Spring"))
     , d_springColor(initData(&d_springColor, type::RGBAColor::green(), "springColor", "spring color"))
 {
-    indices.setOriginalData(&d_indices);
-    angularStiffness.setOriginalData(&d_angularStiffness);
-    angularLimit.setOriginalData(&d_angularLimit);
-    drawSpring.setOriginalData(&d_drawSpring);
-    springColor.setOriginalData(&d_springColor);
-
 }
 
 
@@ -213,7 +207,7 @@ void AngularSpringForceField<DataTypes>::draw(const core::visual::VisualParams* 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
     vparams->drawTool()->setLightingEnabled(false);
 
-    sofa::helper::ReadAccessor< DataVecCoord > p = this->mstate->read(core::VecCoordId::position());
+    sofa::helper::ReadAccessor< DataVecCoord > p = this->mstate->read(core::vec_id::write_access::position);
     sofa::type::vector< type::Vec3 > vertices;
 
     for (sofa::Index i=0; i < d_indices.getValue().size(); i++)

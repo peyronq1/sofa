@@ -42,11 +42,6 @@ FixedTranslationProjectiveConstraint<DataTypes>::FixedTranslationProjectiveConst
     // default to indice 0
     d_indices.beginEdit()->push_back(0);
     d_indices.endEdit();
-
-    f_indices.setOriginalData(&d_indices);
-    f_fixAll.setOriginalData(&d_fixAll);
-    _drawSize.setOriginalData(&d_drawSize);
-    f_coordinates.setOriginalData(&d_coordinates);
 }
 
 
@@ -173,7 +168,7 @@ void FixedTranslationProjectiveConstraint<DataTypes>::draw(const core::visual::V
     const SetIndexArray & indices = d_indices.getValue();
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
     vparams->drawTool()->disableLighting();

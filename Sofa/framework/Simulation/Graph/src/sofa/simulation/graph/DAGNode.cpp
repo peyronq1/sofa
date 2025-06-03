@@ -77,7 +77,7 @@ public:
     Result processNodeTopDown(simulation::Node* node) override
     {
         const DAGNode* dagnode = dynamic_cast<const DAGNode*>(node);
-        if( dagnode->_descendancy.find(_searchNode)!=dagnode->_descendancy.end() ) // searchNode is in the current node descendancy, so the current node is a parent of searchNode
+        if( dagnode->_descendancy.contains(_searchNode) ) // searchNode is in the current node descendancy, so the current node is a parent of searchNode
         {
             dagnode->getLocalObjects( _class_info, _container, _tags );
             return RESULT_CONTINUE;
@@ -522,7 +522,7 @@ sofa::core::topology::BaseMeshTopology* DAGNode::getMeshTopologyLink(SearchDirec
 
 void DAGNode::precomputeTraversalOrder( const sofa::core::ExecParams* params )
 {
-    // acumulating traversed Nodes
+    // accumulating traversed Nodes
     class TraversalOrderVisitor : public Visitor
     {
         NodeList& _orderList;
@@ -594,7 +594,7 @@ void DAGNode::doExecuteVisitor(simulation::Visitor* action, bool precomputedOrde
             //
             // A child node is visited only when all its parents have been visited.
             // A child node is 'pruned' only if all its parents are 'pruned'.
-            // Every excecuted node in the forward traversal are stored in 'executedNodes',
+            // Every executed node in the forward traversal are stored in 'executedNodes',
             // its reverse order is used for the backward traversal.
 
             // Note that a newly 'pruned' node is still traversed (w/o execution) to be sure to execute its child nodes,
@@ -653,7 +653,7 @@ void DAGNode::executeVisitorTopDown(simulation::Visitor* action, NodeList& execu
         for ( unsigned int i = 0; i < parents.size() ; i++ )
         {
             // if the visitor is run from a sub-graph containing a multinode linked with a node outside of the subgraph, do not consider the outside node by looking on the sub-graph descendancy
-            if ( visitorRoot->_descendancy.find(parents[i])!=visitorRoot->_descendancy.end() || parents[i]==visitorRoot )
+            if ( visitorRoot->_descendancy.contains(parents[i]) || parents[i]==visitorRoot )
             {
                 // all parents must have been visited before
                 if ( statusMap[parents[i]] == NOT_VISITED )
@@ -834,7 +834,7 @@ DAGNode* DAGNode::findCommonParent(DAGNode* node1, DAGNode* node2)
 {
     updateDescendancy();
 
-    if (_descendancy.find(node1) == _descendancy.end() || _descendancy.find(node2) == _descendancy.end())
+    if (!_descendancy.contains(node1) || !_descendancy.contains(node2))
         return nullptr; // this is NOT a parent
 
     // this is a parent

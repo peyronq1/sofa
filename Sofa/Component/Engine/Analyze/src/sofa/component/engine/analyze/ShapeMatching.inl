@@ -77,16 +77,6 @@ ShapeMatching<DataTypes>::ShapeMatching()
     addInput(&d_position);
     addInput(&d_cluster);
     addOutput(&d_targetPosition);
-
-    iterations.setOriginalData(&d_iterations);
-    affineRatio.setOriginalData(&d_affineRatio);
-    fixedweight.setOriginalData(&d_fixedweight);
-    fixedPosition0.setOriginalData(&d_fixedPosition0);
-    fixedPosition.setOriginalData(&d_fixedPosition);
-    position.setOriginalData(&d_position);
-    cluster.setOriginalData(&d_cluster);
-    targetPosition.setOriginalData(&d_targetPosition);
-
 }
 
 template <class DataTypes>
@@ -114,7 +104,7 @@ void ShapeMatching<DataTypes>::doUpdate()
     if (!this->mstate)
         return;
 
-    const auto* restPositionsData = this->mstate->read(core::ConstVecCoordId::restPosition());
+    const auto* restPositionsData = this->mstate->read(core::vec_id::read_access::restPosition);
     if (!restPositionsData)
     {
         msg_error() << "Rest position cannot be found in mechanical object '" << this->mstate->getPathName() << "'";

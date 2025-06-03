@@ -143,7 +143,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::initTriangleInfo(Index i, Triangle
         ab *= restScale;
         ac *= restScale;
     }
-    // equivalent to computeRotationLarge but in 2D == do not store the ortogonal vector are framex ^ framey
+    // equivalent to computeRotationLarge but in 2D == do not store the orthogonal vector are framex ^ framey
     computeTriangleRotation(ti.init_frame, ab, ac);
 
     // compute initial position in local space A[0, 0] B[x, 0] C[x, y]
@@ -180,13 +180,13 @@ void TriangularFEMForceFieldOptim<DataTypes>::initTriangleState(Index i, Triangl
 template< class DataTypes>
 void TriangularFEMForceFieldOptim<DataTypes>::createTriangleInfo(Index triangleIndex, TriangleInfo& ti, const Triangle& t, const sofa::type::vector<Index>&, const sofa::type::vector<SReal>&)
 {
-    initTriangleInfo(triangleIndex, ti, t, this->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
+    initTriangleInfo(triangleIndex, ti, t, this->mstate->read(core::vec_id::read_access::restPosition)->getValue());
 }
 
 template< class DataTypes>
 void TriangularFEMForceFieldOptim<DataTypes>::createTriangleState(Index triangleIndex, TriangleState& ti, const Triangle& t, const sofa::type::vector<Index>&, const sofa::type::vector<SReal>&)
 {
-    initTriangleState(triangleIndex, ti, t, this->mstate->read(core::ConstVecCoordId::position())->getValue());
+    initTriangleState(triangleIndex, ti, t, this->mstate->read(core::vec_id::read_access::position)->getValue());
 }
 
 // --------------------------------------------------------------------------------------
@@ -198,8 +198,8 @@ void TriangularFEMForceFieldOptim<DataTypes>::reinit()
     /// prepare to store info in the triangle array
     const unsigned int nbTriangles = this->l_topology->getNbTriangles();
     const VecElement& triangles = this->l_topology->getTriangles();
-    const  VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
-    const  VecCoord& x0 = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const  VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
+    const  VecCoord& x0 = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
     VecTriangleInfo& triangleInf = *(d_triangleInfo.beginEdit());
     VecTriangleState& triangleSta = *(d_triangleState.beginEdit());
     triangleInf.resize(nbTriangles);
@@ -265,7 +265,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addForce(const core::MechanicalPar
         // | 0      gamma1  0      gamma2   0      gamma3 | / (2 * A)
         // | gamma1 beta1   gamma2 beta2    gamma3 beta3 |
 
-        // As no displacement for Pa nor in Pb[y], Beta1, gamma1 and beta3 are not considered. Therefor we obtain:
+        // As no displacement for Pa nor in Pb[y], Beta1, gamma1 and beta3 are not considered. Therefore we obtain:
         // | beta2  0        beta3  0      |
         // | 0      gamma2   0      gamma3 | / (2 * A)
         // | gamma2 beta2    gamma3 beta3 |
@@ -309,7 +309,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addForce(const core::MechanicalPar
         f[t[1]] += fb;
         f[t[2]] += fc;
 
-        // store data for re-use
+        // store data for reuse
         ts.stress = stress;
     }
 
@@ -386,13 +386,10 @@ void TriangularFEMForceFieldOptim<DataTypes>::addDForce(const core::MechanicalPa
 // --------------------------------------------------------------------------------------
 
 template <class DataTypes>
-void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix)
+void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset)
 {
-    sofa::core::behavior::MultiMatrixAccessor::MatrixRef r = matrix->getMatrix(this->mstate);
-
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleState > > triState = d_triangleState;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleInfo > > triInfo = d_triangleInfo;
-    const Real kFactor = (Real)sofa::core::mechanicalparams::kFactorIncludingRayleighDamping(mparams, this->rayleighStiffness.getValue());
     const unsigned int nbTriangles = this->l_topology->getNbTriangles();
     const VecElement& triangles = this->l_topology->getTriangles();
 
@@ -406,7 +403,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrix(const core::Mechanica
         const TriangleInfo& ti = triInfo[i];
         const TriangleState& ts = triState[i];
         sofa::type::MatNoInit<3,4,Real> KJt;
-        const Real factor = -kFactor * ti.ss_factor;
+        const Real factor = -kFact * ti.ss_factor;
         const Real fG = factor * gamma;
         const Real fGM = factor * (gamma+mu);
         const Real fM_2 = factor * (0.5f*mu);
@@ -443,21 +440,21 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrix(const core::Mechanica
 
         Transformation frame = ts.frame;
 
-        r.matrix->add(r.offset + S * t[0], r.offset + S * t[0], frame.multTranspose(JKJt00*frame));
+        matrix->add(offset + S * t[0], offset + S * t[0], frame.multTranspose(JKJt00*frame));
 
         const MatBloc M01 = frame.multTranspose(JKJt01*frame);
-        r.matrix->add(r.offset + S * t[0], r.offset + S * t[1], M01);
-        r.matrix->add(r.offset + S * t[1], r.offset + S * t[0], M01.transposed());
+        matrix->add(offset + S * t[0], offset + S * t[1], M01);
+        matrix->add(offset + S * t[1], offset + S * t[0], M01.transposed());
 
         const MatBloc M02 = frame.multTranspose(JKJt02*frame);
-        r.matrix->add(r.offset + S * t[0], r.offset + S * t[2], M02);
-        r.matrix->add(r.offset + S * t[2], r.offset + S * t[0], M02.transposed());
-        r.matrix->add(r.offset + S * t[1], r.offset + S * t[1], frame.multTranspose(JKJt11*frame));
+        matrix->add(offset + S * t[0], offset + S * t[2], M02);
+        matrix->add(offset + S * t[2], offset + S * t[0], M02.transposed());
+        matrix->add(offset + S * t[1], offset + S * t[1], frame.multTranspose(JKJt11*frame));
 
         const MatBloc M12 = frame.multTranspose(JKJt12*frame);
-        r.matrix->add(r.offset + S * t[1], r.offset + S * t[2], M12);
-        r.matrix->add(r.offset + S * t[2], r.offset + S * t[1], M12.transposed());
-        r.matrix->add(r.offset + S * t[2], r.offset + S * t[2], frame.multTranspose(JKJt22*frame));
+        matrix->add(offset + S * t[1], offset + S * t[2], M12);
+        matrix->add(offset + S * t[2], offset + S * t[1], M12.transposed());
+        matrix->add(offset + S * t[2], offset + S * t[2], frame.multTranspose(JKJt22*frame));
     }
 }
 
@@ -773,7 +770,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::draw(const core::visual::VisualPar
     using type::Vec3i;
     using type::Vec4f;
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     unsigned int nbTriangles=this->l_topology->getNbTriangles();
     const VecElement& triangles = this->l_topology->getTriangles();
     const Real& stressThresold = d_showStressThreshold.getValue();

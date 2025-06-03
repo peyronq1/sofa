@@ -36,7 +36,7 @@ void VectorSpringForceField<DataTypes>::createEdgeInformation(Index, Spring &t,
         const sofa::type::vector<Index> & ancestors,
         const sofa::type::vector<SReal> & coefs)
 {
-    const typename DataTypes::VecCoord& x0 = this->getObject1()->read(core::ConstVecCoordId::restPosition())->getValue();
+    const typename DataTypes::VecCoord& x0 = this->getObject1()->read(core::vec_id::read_access::restPosition)->getValue();
     t.restVector = x0[e[1]] - x0[e[0]];
     if (ancestors.size()>0)
     {
@@ -125,19 +125,13 @@ VectorSpringForceField<DataTypes>::VectorSpringForceField(MechanicalState* _obje
     : Inherit(_object1, _object2)
     , m_potentialEnergy( 0.0 ), useTopology( false )
     , d_springArray(initData(&d_springArray, "springs", "springs data"))
-    , d_filename(initData(&d_filename, std::string(""), "filename", "File name from which the spring informations are loaded") )
+    , d_filename(initData(&d_filename, std::string(""), "filename", "File name from which the spring information are loaded") )
     , d_stiffness(initData(&d_stiffness, SReal(1.0), "stiffness", "Default edge stiffness used in absence of file information") )
     , d_viscosity(initData(&d_viscosity, SReal(1.0), "viscosity", "Default edge viscosity used in absence of file information") )
-    , d_useTopology(initData(&d_useTopology, false, "useTopology", "Activate/Desactivate topology mode of the component (springs on each edge)"))
+    , d_useTopology(initData(&d_useTopology, false, "useTopology", "Activate/Deactivate topology mode of the component (springs on each edge)"))
     , l_topology(initLink("topology", "link to the topology container"))    
     , m_topology(nullptr)
 {
-    springArray.setOriginalData(&d_springArray);
-    m_filename.setParent(&d_filename);
-    m_stiffness.setOriginalData(&d_stiffness);
-    m_viscosity.setOriginalData(&d_viscosity);
-    m_useTopology.setOriginalData(&d_useTopology);
-
 }
 
 template<class DataTypes>
@@ -232,7 +226,7 @@ void VectorSpringForceField<DataTypes>::createDefaultSprings()
     type::vector<Spring>& springArrayData = *(d_springArray.beginEdit());
 
     springArrayData.resize(m_topology->getNbEdges());
-    const VecCoord& x0 = this->mstate1->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x0 = this->mstate1->read(core::vec_id::read_access::restPosition)->getValue();
     unsigned int i;
     for (i=0; i<m_topology->getNbEdges(); ++i)
     {
@@ -368,9 +362,9 @@ void VectorSpringForceField<DataTypes>::draw(const core::visual::VisualParams* v
 
     if (!((this->mstate1 == this->mstate2)?vparams->displayFlags().getShowForceFields():vparams->displayFlags().getShowInteractionForceFields()))
         return;
-    //const VecCoord& p = this->mstate->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& x1 =this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& x2 =this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    //const VecCoord& p = this->mstate->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& x1 =this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& x2 =this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
 
     std::vector< Vec3 > points;

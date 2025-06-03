@@ -23,7 +23,7 @@
 
 #include <sofa/core/fwd.h>
 #include <sofa/core/objectmodel/Data.h>
-#include <sofa/core/objectmodel/RemovedData.h>
+#include <sofa/core/objectmodel/lifecycle/RemovedData.h>
 #include <sofa/core/objectmodel/Link.h>
 #include <sofa/core/objectmodel/BaseClass.h>
 #include <sofa/core/objectmodel/BaseObjectDescription.h>
@@ -33,11 +33,11 @@
 #include <sofa/core/sptr.h>
 
 #include <deque>
-#include <atomic>
 
 #include <sofa/core/objectmodel/ComponentState.h>
 #include <sofa/core/DataTracker.h>
 #include <sofa/core/DataTrackerCallback.h>
+#include <sofa/core/IntrusiveObject.h>
 #include <sofa/type/fwd.h>
 
 #define SOFA_BASE_CAST_IMPLEMENTATION(CLASSNAME) \
@@ -50,12 +50,12 @@ namespace sofa::core::objectmodel
 /**
  *  \brief Base class for everything
  *
- *  This class contains all functionnality shared by every objects in SOFA.
+ *  This class contains all functionality shared by every objects in SOFA.
  *  Most importantly it defines how to retrieve information about an object (name, type, data fields).
  *  All classes deriving from Base should use the SOFA_CLASS macro within their declaration (see BaseClass.h).
  *
  */
-class SOFA_CORE_API Base
+class SOFA_CORE_API Base : public IntrusiveObject
 {
 public:
     typedef Base* Ptr;
@@ -85,20 +85,6 @@ private:
     /// Copy constructor is not allowed
     Base(const Base& b);
     Base& operator=(const Base& b);
-
-    std::atomic<int> ref_counter;
-    void addRef();
-    void release();
-
-    friend inline void intrusive_ptr_add_ref(Base* p)
-    {
-        p->addRef();
-    }
-
-    friend inline void intrusive_ptr_release(Base* p)
-    {
-        p->release();
-    }
 
 protected:
     std::map<std::string, sofa::core::DataTrackerCallback> m_internalEngine;
@@ -190,8 +176,8 @@ public:
     virtual void parseFields ( const std::map<std::string,std::string*>& str );
 
     /// Write the current field values to the given map of name -> value pairs
-    SOFA_ATTRIBUTE_DEPRECATED__BASEWRITEDATAS()
-    void writeDatas (std::map<std::string,std::string*>& str);
+    SOFA_ATTRIBUTE_DISABLED__BASEWRITEDATAS()
+    void writeDatas (std::map<std::string,std::string*>& str) = delete;
 
     /// Write the current field values to the given output stream
     /// separated with the given separator (" " used by default for XML)
@@ -369,6 +355,7 @@ public:
 
     ComponentState getComponentState() const { return d_componentState.getValue() ; }
     bool isComponentStateValid() const { return d_componentState.getValue() == ComponentState::Valid; }
+    bool isComponentStateInvalid() const { return d_componentState.getValue() == ComponentState::Invalid; }
 
     ///@}
 
@@ -391,7 +378,7 @@ public:
 
     Data<bool> f_printLog; ///< if true, emits extra messages at runtime.
 
-    Data< sofa::core::objectmodel::TagSet > f_tags; ///< list of the subsets the objet belongs to
+    Data< sofa::core::objectmodel::TagSet > f_tags; ///< list of the subsets the object belongs to
 
     Data< sofa::type::BoundingBox > f_bbox; ///< this object bounding box
 
@@ -421,7 +408,6 @@ public:
     SOFA_BASE_CAST_DEFINITION( core,        BehaviorModel                          )
     SOFA_BASE_CAST_DEFINITION( core,        CollisionModel                         )
     SOFA_BASE_CAST_DEFINITION( core,        DataEngine                             )
-    SOFA_BASE_CAST_DEFINITION( core,        DevBaseMonitor                         )
     SOFA_BASE_CAST_DEFINITION( objectmodel, BaseContext                            )
     SOFA_BASE_CAST_DEFINITION( objectmodel, BaseObject                             )
     SOFA_BASE_CAST_DEFINITION( objectmodel, BaseNode                               )
@@ -440,7 +426,7 @@ public:
     SOFA_BASE_CAST_DEFINITION( behavior,    BaseProjectiveConstraintSet            )
     SOFA_BASE_CAST_DEFINITION( behavior,    BaseInteractionProjectiveConstraintSet )
     SOFA_BASE_CAST_DEFINITION( behavior,    BaseConstraintSet                      )
-    SOFA_BASE_CAST_DEFINITION( behavior,    BaseConstraint                         )
+    SOFA_BASE_CAST_DEFINITION( behavior,    BaseLagrangianConstraint               )
     SOFA_BASE_CAST_DEFINITION( visual,      VisualModel                            )
     SOFA_BASE_CAST_DEFINITION( visual,      VisualManager                          )
     SOFA_BASE_CAST_DEFINITION( visual,      VisualLoop                             )
@@ -456,6 +442,9 @@ public:
     SOFA_BASE_CAST_DEFINITION( loader,      BaseLoader                             )
 
 #undef SOFA_BASE_CAST_DEFINITION
+
+    SOFA_ATTRIBUTE_DEPRECATED__TOBASECONSTRAINT() virtual const behavior::BaseLagrangianConstraint* toBaseConstraint() const { return toBaseLagrangianConstraint(); } \
+    SOFA_ATTRIBUTE_DEPRECATED__TOBASECONSTRAINT() virtual       behavior::BaseLagrangianConstraint* toBaseConstraint()       { return toBaseLagrangianConstraint(); }
 
     /// @}
 };

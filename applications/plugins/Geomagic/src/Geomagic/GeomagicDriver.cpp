@@ -31,7 +31,7 @@
 #include <thread>
 #include <chrono>
 
-namespace sofa::component::controller
+namespace geomagic
 {
     
 using namespace sofa::defaulttype;
@@ -166,7 +166,7 @@ GeomagicDriver::GeomagicDriver()
     , d_frameVisu(initData(&d_frameVisu, false, "drawDeviceFrame", "Visualize the frame corresponding to the device tooltip"))
     , d_omniVisu(initData(&d_omniVisu, false, "drawDevice", "Visualize the Geomagic device in the virtual scene"))    
     , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))
-    , d_angle(initData(&d_angle, "angle", "Angluar values of joint (rad)"))
+    , d_angle(initData(&d_angle, "angle", "Angular values of joint (rad)"))
     , d_button_1(initData(&d_button_1,"button1","Button state 1"))
     , d_button_2(initData(&d_button_2,"button2","Button state 2"))    
     , l_forceFeedback(initLink("forceFeedBack", "link to the forceFeedBack component, if not set will search through graph and take first one encountered."))
@@ -527,9 +527,11 @@ void GeomagicDriver::handleEvent(core::objectmodel::Event *event)
 }
 
 
-int GeomagicDriverClass = core::RegisterObject("Driver allowing interfacing with Geomagic haptic devices.")
-.add< GeomagicDriver >()
-.addAlias("DefaultHapticsDevice")
-;
+void registerGeomagicDriver(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Driver allowing interfacing with Geomagic haptic devices.")
+    .add< GeomagicDriver >()
+    .addAlias("DefaultHapticsDevice"));
+}
 
-} // namespace sofa::component::controller
+} // namespace geomagic

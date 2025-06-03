@@ -131,11 +131,11 @@ public:
     inline virtual void setMargin(SReal margin){_bt_cshape.setMargin(margin);}
 
     inline const Coord & center()const{
-        return DataTypes::getCPos(_mstate->read(core::ConstVecCoordId::position())->getValue()[0]);
+        return DataTypes::getCPos(_mstate->read(core::vec_id::read_access::position)->getValue()[0]);
     }
 
     inline const Quaternion & orientation()const{
-        return _mstate->read(core::ConstVecCoordId::position())->getValue()[0].getOrientation();
+        return _mstate->read(core::vec_id::read_access::position)->getValue()[0].getOrientation();
     }
 
     Data<bool> computeConvexHullDecomposition; ///< compute convex hull decomposition using HACD
@@ -143,7 +143,7 @@ public:
     Data<VecCoord> CHPoints; ///< points defining the convex hull
     Data<bool> computeNormals; ///< set to false to disable computation of triangles normal
     Data<bool> positionDefined; ///< set to true if the collision model position is defined in the mechanical object
-    Data<SReal> concavityThreeshold; ///< Threeshold used in the decomposition
+    Data<SReal> concavityThreeshold; ///< Threshold used in the decomposition
 protected:
     void draw_without_decomposition(const core::visual::VisualParams* vparams);
     void draw_decomposition(const core::visual::VisualParams* vparams);

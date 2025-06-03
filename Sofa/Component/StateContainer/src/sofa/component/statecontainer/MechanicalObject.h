@@ -38,7 +38,7 @@
 namespace sofa::component::statecontainer
 {
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template <class DataTypes>
 class MechanicalObject;
 
@@ -70,11 +70,7 @@ public:
     typedef typename DataTypes::MatrixDeriv::ColConstIterator	MatrixDerivColConstIterator;
     typedef typename DataTypes::MatrixDeriv::RowIterator		MatrixDerivRowIterator;
     typedef typename DataTypes::MatrixDeriv::ColIterator		MatrixDerivColIterator;
-
     typedef typename core::behavior::BaseMechanicalState::ConstraintBlock ConstraintBlock;
-
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Index, sofa::Index);
 
 protected:
     MechanicalObject();
@@ -150,13 +146,13 @@ public:
 
     Size getSize() const override { return d_size.getValue(); }
 
-    SReal getPX(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::ConstVecCoordId::position())->getValue())[i]); return (SReal)x; }
-    SReal getPY(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::ConstVecCoordId::position())->getValue())[i]); return (SReal)y; }
-    SReal getPZ(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::ConstVecCoordId::position())->getValue())[i]); return (SReal)z; }
+    SReal getPX(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::vec_id::read_access::position)->getValue())[i]); return (SReal)x; }
+    SReal getPY(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::vec_id::read_access::position)->getValue())[i]); return (SReal)y; }
+    SReal getPZ(sofa::Index i) const override { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z,(read(core::vec_id::read_access::position)->getValue())[i]); return (SReal)z; }
 
-    SReal getVX(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::ConstVecDerivId::velocity())->getValue()[i]); return (SReal)x; }
-    SReal getVY(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::ConstVecDerivId::velocity())->getValue()[i]); return (SReal)y; }
-    SReal getVZ(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::ConstVecDerivId::velocity())->getValue()[i]); return (SReal)z; }
+    SReal getVX(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::vec_id::read_access::velocity)->getValue()[i]); return (SReal)x; }
+    SReal getVY(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::vec_id::read_access::velocity)->getValue()[i]); return (SReal)y; }
+    SReal getVZ(sofa::Index i) const { Real x=0.0,y=0.0,z=0.0; DataTypes::get(x,y,z, read(core::vec_id::read_access::velocity)->getValue()[i]); return (SReal)z; }
 
 
     /** \brief Overwrite values at index outputIndex by the ones at inputIndex.
@@ -263,7 +259,7 @@ public:
 
     void endIntegration(const core::ExecParams* params, SReal dt) override;
 
-    void accumulateForce(const core::ExecParams* params, core::VecDerivId f = core::VecDerivId::force()) override; // see BaseMechanicalState::accumulateForce(const ExecParams*, VecId) override
+    void accumulateForce(const core::ExecParams* params, core::VecDerivId f = core::vec_id::write_access::force) override; // see BaseMechanicalState::accumulateForce(const ExecParams*, VecId) override
 
     /// Increment the index of the given VecCoordId, so that all 'allocated' vectors in this state have a lower index
     void vAvail(const core::ExecParams* params, core::VecCoordId& v) override;
@@ -315,9 +311,9 @@ public:
 
     Size vSize( const core::ExecParams* params, core::ConstVecId v ) override;
 
-    void resetForce(const core::ExecParams* params, core::VecDerivId f = core::VecDerivId::force()) override;
+    void resetForce(const core::ExecParams* params, core::VecDerivId f = core::vec_id::write_access::force) override;
 
-    void resetAcc(const core::ExecParams* params, core::VecDerivId a = core::VecDerivId::dx()) override;
+    void resetAcc(const core::ExecParams* params, core::VecDerivId a = core::vec_id::write_access::dx) override;
 
     void resetConstraint(const core::ConstraintParams* cparams) override;
 

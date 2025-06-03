@@ -26,13 +26,12 @@
 
 namespace sofa::component::topology::container::dynamic
 {
-using namespace std;
-using namespace sofa::defaulttype;
 
-
-int TriangleSetTopologyContainerClass = core::RegisterObject("Triangle set topology container")
-        .add< TriangleSetTopologyContainer >()
-        ;
+void registerTriangleSetTopologyContainer(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Topology container dedicated to a triangular topology.")
+        .add< TriangleSetTopologyContainer >());
+}
 
 TriangleSetTopologyContainer::TriangleSetTopologyContainer()
     : EdgeSetTopologyContainer()
@@ -53,6 +52,8 @@ void TriangleSetTopologyContainer::addTriangle(Index a, Index b, Index c )
 
 void TriangleSetTopologyContainer::init()
 {
+    core::topology::TopologyContainer::init();
+
     const helper::ReadAccessor< Data< sofa::type::vector<Triangle> > > m_triangle = d_triangle;
 
     if (d_initPoints.isSet())
@@ -74,13 +75,13 @@ void TriangleSetTopologyContainer::init()
 
     // only init if triangles are present at init.
     if (!m_triangle.empty())
-        initTopology();
+        computeCrossElementBuffers();
 }
 
-void TriangleSetTopologyContainer::initTopology()
+void TriangleSetTopologyContainer::computeCrossElementBuffers()
 {
-    // Force creation of Edge Neighboordhood buffers.
-    EdgeSetTopologyContainer::initTopology();
+    // Force creation of Edge Neighborhood buffers.
+    EdgeSetTopologyContainer::computeCrossElementBuffers();
 
     // Create triangle cross element buffers.
     createEdgesInTriangleArray();
@@ -223,7 +224,7 @@ void TriangleSetTopologyContainer::createEdgeSetArray()
             // sort vertices in lexicographic order
             const Edge e = ((v1<v2) ? Edge(v1,v2) : Edge(v2,v1));
 
-            if(edgeMap.find(e) == edgeMap.end())
+            if(!edgeMap.contains(e))
             {
                 // edge not in edgeMap so create a new one
                 const size_t edgeIndex = edgeMap.size();
@@ -327,7 +328,7 @@ void TriangleSetTopologyContainer::createEdgesInTriangleArray()
                 // sort vertices in lexicographic order
                 const Edge e = ((v1<v2) ? Edge(v1,v2) : Edge(v2,v1));
 
-                if(edgeMap.find(e) == edgeMap.end())
+                if(!edgeMap.contains(e))
                 {
                     // edge not in edgeMap so create a new one
                     const size_t edgeIndex = edgeMap.size();
@@ -760,7 +761,7 @@ bool TriangleSetTopologyContainer::checkConnexity()
 
     if (elemAll.size() != nbr)
     {
-        msg_warning() << "CheckConnexity: Triangles are missings. There is more than one connexe component.";
+        msg_warning() << "CheckConnexity: Triangles are missing. There is more than one connexe component.";
         return false;
     }
     return true;

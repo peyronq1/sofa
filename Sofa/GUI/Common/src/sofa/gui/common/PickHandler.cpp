@@ -170,7 +170,7 @@ Operation *PickHandler::changeOperation(sofa::component::setting::MouseButtonSet
         delete operations[setting->d_button.getValue().getSelectedId()];
         operations[setting->d_button.getValue().getSelectedId()] = nullptr;
     }
-    Operation *mouseOp=OperationFactory::Instanciate(setting->getOperationType());
+    Operation *mouseOp=OperationFactory::Instantiate(setting->getOperationType());
     if (mouseOp)
     {
         mouseOp->configure(this,setting);
@@ -187,7 +187,7 @@ Operation *PickHandler::changeOperation(MOUSE_BUTTON button, const std::string &
         delete operations[button];
         operations[button] = nullptr;
     }
-    Operation *mouseOp=OperationFactory::Instanciate(op);
+    Operation *mouseOp=OperationFactory::Instantiate(op);
     mouseOp->configure(this,button);
     operations[button]=mouseOp;
     return mouseOp;
@@ -286,8 +286,8 @@ void PickHandler::updateRay(const sofa::type::Vec3 &position,const sofa::type::V
 
     mouseCollision->getRay(0).setOrigin( position+orientation*interaction->mouseInteractor->getDistanceFromMouse() );
     mouseCollision->getRay(0).setDirection( orientation );
-    MechanicalPropagateOnlyPositionVisitor(sofa::core::mechanicalparams::defaultInstance(), 0, sofa::core::VecCoordId::position()).execute(mouseCollision->getContext());
-    MechanicalPropagateOnlyPositionVisitor(sofa::core::mechanicalparams::defaultInstance(), 0, sofa::core::VecCoordId::freePosition()).execute(mouseCollision->getContext());
+    MechanicalPropagateOnlyPositionVisitor(sofa::core::mechanicalparams::defaultInstance(), 0, sofa::core::vec_id::write_access::position).execute(mouseCollision->getContext());
+    MechanicalPropagateOnlyPositionVisitor(sofa::core::mechanicalparams::defaultInstance(), 0, sofa::core::vec_id::write_access::freePosition).execute(mouseCollision->getContext());
 
     if (needToCastRay())
     {

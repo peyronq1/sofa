@@ -55,9 +55,6 @@ using MeshTopology::getQuad;
 using MeshTopology::getHexahedron;
 
     SOFA_CLASS(GridTopology,MeshTopology);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vec3i, sofa::type::Vec3i);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector2, sofa::type::Vec2);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
     typedef Vec2 TextCoords2D;
     friend class GridUpdate;
 
@@ -102,7 +99,7 @@ protected:
     /// Method to compute Point list, called if \sa d_computePointList is true at init. Should be overwritten by children.
     virtual void computePointList();
 
-    /// Method that will check current grid resolution, if invalide, will set default value: [2; 2; 2]
+    /// Method that will check current grid resolution, if invalid, will set default value: [2; 2; 2]
     void checkGridResolution();
 
     /// Internal Method called by \sa checkGridResolution if resolution need to be changed. Should be overwritten by children.

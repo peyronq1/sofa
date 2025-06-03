@@ -33,13 +33,13 @@
 namespace sofa::component::topology::container::dynamic
 {
 
-using namespace std;
 using namespace sofa::type;
-using namespace sofa::defaulttype;
 
-int MultilevelHexahedronSetTopologyContainerClass = core::RegisterObject("Hexahedron set topology container")
-        .add< MultilevelHexahedronSetTopologyContainer >()
-        ;
+void registerMultilevelHexahedronSetTopologyContainer(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Multilevel Hexahedron set topology container.")
+        .add< MultilevelHexahedronSetTopologyContainer >());
+}
 
 MultilevelHexahedronSetTopologyContainer::MultilevelHexahedronSetTopologyContainer()
     : HexahedronSetTopologyContainer(),
@@ -279,7 +279,7 @@ MultilevelHexahedronSetTopologyContainer::getHexaChildren(const Index hexaId,
 
     for(Size i=0; i<_fineComponents.getValue().size(); ++i)
     {
-        if(compSet.find(_fineComponents.getValue()[i]) != compSet.end())
+        if(compSet.contains(_fineComponents.getValue()[i]))
             children.push_back(i);
     }
 
@@ -498,7 +498,7 @@ void MultilevelHexahedronSetTopologyContainer::Component::removeVoxels(const std
 
 bool MultilevelHexahedronSetTopologyContainer::Component::hasVoxel(const Vec3i& voxel) const
 {
-    return (this->_voxels.find(voxel) != this->_voxels.end());
+    return this->_voxels.contains(voxel);
 }
 
 bool MultilevelHexahedronSetTopologyContainer::Component::isEmpty() const

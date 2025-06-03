@@ -50,7 +50,7 @@ namespace sofa {
 
 
 /** @brief Helper for writing ForceField tests.
- * The constructor creates a root node and adds it a State and a ForceField (of the paremeter type of this template class).
+ * The constructor creates a root node and adds it a State and a ForceField (of the parameter type of this template class).
  * Pointers to node, state and force are available.
  * Deriving the ForceField test from this class makes it easy to write: just call function run_test with positions, velocities and the corresponding expected forces.
  * This function automatically checks not only the forces (function addForce), but also the stiffness (methods addDForce and addKToMatrix), using finite differences.
@@ -81,7 +81,7 @@ struct ForceField_test : public BaseSimulationTest, NumericTest<typename _ForceF
     /// @name Precision and control parameters
     /// {
     SReal errorMax;       ///< tolerance in precision test. The actual value is this one times the epsilon of the Real numbers (typically float or double)
-    SReal errorFactorPotentialEnergy;  ///< The test for potential energy is successfull if the (infinite norm of the) difference is less than  errorFactorPotentialEnergy * errorMax *epsilon (default = 1)
+    SReal errorFactorPotentialEnergy;  ///< The test for potential energy is successful if the (infinite norm of the) difference is less than  errorFactorPotentialEnergy * errorMax *epsilon (default = 1)
     /**
      * @brief Minimum/Maximum amplitudes of the random perturbation used to check the stiffness using finite differences
      * @warning Should be more than errorMax/stiffness. This is not checked automatically.
@@ -182,9 +182,9 @@ struct ForceField_test : public BaseSimulationTest, NumericTest<typename _ForceF
         }
         core::MechanicalParams mparams;
         mparams.setKFactor(1.0);
-        MechanicalResetForceVisitor resetForce(&mparams, core::VecDerivId::force());
+        MechanicalResetForceVisitor resetForce(&mparams, core::vec_id::write_access::force);
         node->execute(resetForce);
-        MechanicalComputeForceVisitor computeForce( &mparams, core::VecDerivId::force() );
+        MechanicalComputeForceVisitor computeForce( &mparams, core::vec_id::write_access::force );
         this->node->execute(computeForce);
 
         // check force
@@ -253,10 +253,10 @@ struct ForceField_test : public BaseSimulationTest, NumericTest<typename _ForceF
 
         // check computeDf: compare its result to actual change
         node->execute(resetForce);
-        dof->vRealloc( &mparams, core::VecDerivId::dx()); // dx is not allocated by default
+        dof->vRealloc( &mparams, core::vec_id::write_access::dx); // dx is not allocated by default
         typename DOF::WriteVecDeriv wdx = dof->writeDx();
         sofa::testing::copyToData ( wdx, dX );
-        MechanicalComputeDfVisitor computeDf( &mparams, core::VecDerivId::force() );
+        MechanicalComputeDfVisitor computeDf( &mparams, core::vec_id::write_access::force );
         node->execute(computeDf);
         VecDeriv dF;
         sofa::testing::copyFromData( dF, dof->readForces() );

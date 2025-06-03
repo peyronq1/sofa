@@ -30,7 +30,7 @@
 namespace sofa::component::mechanicalload
 {
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template<class DataTypes>
 class EllipsoidForceFieldInternalData
 {
@@ -83,26 +83,15 @@ protected:
     };
 
     Data<sofa::type::vector<Contact> > d_contacts; ///< Vector of contacts
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved contacts; ///< Contacts
-
     EllipsoidForceFieldInternalData<DataTypes> data;
 
 public:
 
     Data<Coord> d_center; ///< ellipsoid center
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved center; ///< ellipsoid center
-
     Data<Coord> d_vradius; ///< ellipsoid radius
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved vradius; ///< ellipsoid radius
-
     Data<Real> d_stiffness; ///< force stiffness (positive to repulse outward, negative inward)
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved stiffness; ///< force stiffness (positive to repulse outward, negative inward)
-
     Data<Real> d_damping; ///< force damping
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved damping; ///< force damping
-
     Data<sofa::type::RGBAColor> d_color; ///< ellipsoid color. (default=0,0.5,1.0,1.0)
-    SOFA_ELLIPSOIDFORCEFIELD_RENAMEDDATA_DISABLED() DeprecatedAndRemoved color; ///< ellipsoid color. (default=0,0.5,1.0,1.0)
 
 protected:
     EllipsoidForceField();

@@ -49,10 +49,8 @@
 #include <sofa/core/Mapping.h>
 
 #include <sofa/simulation/Node.inl>
-#include <sofa/simulation/VisitorScheduler.h>
 #include <sofa/simulation/PropagateEventVisitor.h>
 #include <sofa/simulation/UpdateMappingEndEvent.h>
-#include <sofa/simulation/AnimateVisitor.h>
 #include <sofa/simulation/DeactivatedNodeVisitor.h>
 #include <sofa/simulation/InitVisitor.h>
 #include <sofa/simulation/MechanicalVisitor.h>
@@ -100,6 +98,7 @@ Node::Node(const std::string& name)
 
     , animationManager(initLink("animationLoop","The AnimationLoop attached to this node (only valid for root node)"))
     , visualLoop(initLink("visualLoop", "The VisualLoop attached to this node (only valid for root node)"))
+    , visualStyle(initLink("visualStyle", "The VisualStyle(s) attached to this node"))
     , topology(initLink("topology", "The Topology attached to this node"))
     , meshTopology(initLink("meshTopology", "The MeshTopology / TopologyContainer attached to this node"))
     , state(initLink("state", "The State attached to this node (storing vectors such as position, velocity)"))
@@ -930,6 +929,7 @@ void Node::printComponents()
     using core::objectmodel::ContextObject;
     using core::collision::Pipeline;
     using core::BaseState;
+    using core::visual::BaseVisualStyle;
 
     std::stringstream sstream;
 
@@ -987,6 +987,9 @@ void Node::printComponents()
     sstream << "\n" << "VisualModel: ";
     for (NodeSequence<VisualModel>::iterator i = visualModel.begin(), iend = visualModel.end(); i != iend; ++i)
         sstream << (*i)->getName() << " ";
+    sstream << "\n" << "BaseVisualStyle: ";
+    for (NodeSingle<BaseVisualStyle>::iterator i = visualStyle.begin(), iend = visualStyle.end(); i != iend; ++i)
+        sstream << (*i)->getName() << " ";
     sstream << "\n" << "CollisionModel: ";
     for (NodeSequence<CollisionModel>::iterator i = collisionModel.begin(), iend = collisionModel.end(); i != iend; ++i)
         sstream << (*i)->getName() << " ";
@@ -1001,15 +1004,6 @@ void Node::printComponents()
     msg_info() << sstream.str();
 }
 
-Node::SPtr Node::create( const std::string& name )
-{
-    if (Simulation* simulation = getSimulation())
-    {
-        return simulation->createNewNode(name);
-    }
-    return nullptr;
-}
-
 void Node::setSleeping(bool val)
 {
     if (val != d_isSleeping.getValue())
@@ -1019,8 +1013,26 @@ void Node::setSleeping(bool val)
     }
 }
 
+template<class LinkType, class Component>
+void checkAlreadyContains(Node& self, LinkType& link, Component* obj)
+{
+    if constexpr (!LinkType::IsMultiLink)
+    {
+        if (link != obj && link != nullptr)
+        {
+            static const auto componentClassName = Component::GetClass()->className;
+            msg_warning(&self) << "Trying to add a " << componentClassName << " ('"
+                << obj->getName() << "' [" << obj->getClassName() << "] " << obj << ")"
+                << " into the Node '" << self.getPathName()
+                << "', whereas it already contains one ('" << link->getName() << "' [" << link->getClassName() << "] " << link.get() << ")."
+                << " Only one " << componentClassName << " is permitted in a Node. The previous "
+                << componentClassName << " is replaced and the behavior is undefined.";
+        }
+    }
+}
+
 #define NODE_DEFINE_SEQUENCE_ACCESSOR( CLASSNAME, FUNCTIONNAME, SEQUENCENAME ) \
-    void Node::add##FUNCTIONNAME( CLASSNAME* obj ) { SEQUENCENAME.add(obj); } \
+    void Node::add##FUNCTIONNAME( CLASSNAME* obj ) { checkAlreadyContains(*this, SEQUENCENAME, obj); SEQUENCENAME.add(obj); } \
     void Node::remove##FUNCTIONNAME( CLASSNAME* obj ) { SEQUENCENAME.remove(obj); }
 
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::behavior::BaseAnimationLoop, AnimationLoop, animationManager )
@@ -1045,6 +1057,7 @@ NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::objectmodel::ContextObject, ContextOb
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::objectmodel::ConfigurationSetting, ConfigurationSetting, configurationSetting )
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::visual::Shader, Shader, shaders )
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::visual::VisualModel, VisualModel, visualModel )
+NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::visual::BaseVisualStyle, VisualStyle, visualStyle )
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::visual::VisualManager, VisualManager, visualManager )
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::CollisionModel, CollisionModel, collisionModel )
 NODE_DEFINE_SEQUENCE_ACCESSOR( sofa::core::collision::Pipeline, CollisionPipeline, collisionPipeline )
@@ -1071,6 +1084,7 @@ template class NodeSequence<sofa::core::objectmodel::BaseObject>;
 
 template class NodeSingle<sofa::core::behavior::BaseAnimationLoop>;
 template class NodeSingle<sofa::core::visual::VisualLoop>;
+template class NodeSingle<sofa::core::visual::BaseVisualStyle>;
 template class NodeSingle<sofa::core::topology::Topology>;
 template class NodeSingle<sofa::core::topology::BaseMeshTopology>;
 template class NodeSingle<sofa::core::BaseState>;

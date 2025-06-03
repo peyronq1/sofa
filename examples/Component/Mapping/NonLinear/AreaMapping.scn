@@ -18,7 +18,8 @@
         <RequiredPlugin name="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TriangleSetTopologyContainer] -->
         <RequiredPlugin name="Sofa.Component.Topology.Container.Grid"/> <!-- Needed to use components [RegularGridTopology] -->
         <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
-        <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
+        <RequiredPlugin name="Sofa.GL.Component.Rendering2D"/> <!-- Needed to use components [OglColorMap] -->
+        <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [DataDisplay OglModel] -->
     </Node>
 
     <FreeMotionAnimationLoop solveVelocityConstraintFirst="true" computeBoundingBox="false" parallelODESolving="true"/>
@@ -48,7 +49,9 @@
         </Node>
 
         <Node name="Visu">
-            <OglModel name="Visual" color="green" />
+            <VisualStyle displayFlags="hideWireframe"/>
+            <DataDisplay name="Visual" triangleData="@../constraintSpace/areaDoFs.position"/>
+            <OglColorMap colorScheme="HSV" showLegend="true" legendTitle="Triangle area" min="@Visual.currentMin" max="@Visual.currentMax"/>
             <IdentityMapping input="@.." output="@Visual" />
         </Node>
     </Node>
@@ -73,7 +76,7 @@
         </Node>
 
         <Node name="Visu">
-            <OglModel name="Visual" color="red" />
+            <OglModel name="Visual" color="darkgray" />
             <IdentityMapping input="@.." output="@Visual" />
         </Node>
     </Node>

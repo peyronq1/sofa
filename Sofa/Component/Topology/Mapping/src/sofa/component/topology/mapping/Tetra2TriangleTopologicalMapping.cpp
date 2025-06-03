@@ -42,18 +42,14 @@
 namespace sofa::component::topology::mapping
 {
 
-using namespace sofa::defaulttype;
-
 using namespace sofa::component::topology::mapping;
 using namespace sofa::core::topology;
 
-// Register in the Factory
-int Tetra2TriangleTopologicalMappingClass = core::RegisterObject("Special case of mapping where TetrahedronSetTopology is converted to TriangleSetTopology")
-        .add< Tetra2TriangleTopologicalMapping >()
-
-        ;
-
-// Implementation
+void registerTetra2TriangleTopologicalMapping(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Topological mapping where TetrahedronSetTopology is converted to TriangleSetTopology")
+        .add< Tetra2TriangleTopologicalMapping >());
+}
 
 Tetra2TriangleTopologicalMapping::Tetra2TriangleTopologicalMapping()
     : sofa::core::topology::TopologicalMapping()
@@ -64,10 +60,6 @@ Tetra2TriangleTopologicalMapping::Tetra2TriangleTopologicalMapping()
 {
     m_inputType = geometry::ElementType::TETRAHEDRON;
     m_outputType = geometry::ElementType::TRIANGLE;
-
-    flipNormals.setOriginalData(&d_flipNormals);
-    noNewTriangles.setOriginalData(&d_noNewTriangles);
-    noInitialTriangles.setOriginalData(&d_noInitialTriangles);
 }
 
 void Tetra2TriangleTopologicalMapping::init()
@@ -203,7 +195,7 @@ void Tetra2TriangleTopologicalMapping::updateTopologicalMappingTopDown()
                     unsigned int lastLocId = iter_last->second;
                     Glob2LocMap[oldGlobTriId] = lastLocId;
 
-                    if (lastLocId < Loc2GlobVec.size()) // could be maped to an already removed element in loc2Glob
+                    if (lastLocId < Loc2GlobVec.size()) // could be mapped to an already removed element in loc2Glob
                         Loc2GlobVec[lastLocId] = oldGlobTriId;
                 }
                 else
@@ -311,7 +303,7 @@ void Tetra2TriangleTopologicalMapping::updateTopologicalMappingTopDown()
             {
                 BaseMeshTopology::TriangleID lastGlobId = Loc2GlobVec.back();
 
-                // udpate loc2glob array
+                // update loc2glob array
                 Loc2GlobVec[triLocId] = lastGlobId;
                 Loc2GlobVec.pop_back();
 

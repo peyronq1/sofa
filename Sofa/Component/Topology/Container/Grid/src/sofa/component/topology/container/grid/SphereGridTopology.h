@@ -28,7 +28,7 @@ namespace sofa::component::topology::container::grid
 {
 
 /** \brief Define a sphere grid topology
- * Paramenters are its @sa d_radius and discretisation .
+ * Parameters are its @sa d_radius and discretisation .
  * Position and direction are set by @sa d_center and @sa d_axis
  * nz discretisation is along the sphere axis
   */
@@ -37,7 +37,6 @@ class SOFA_COMPONENT_TOPOLOGY_CONTAINER_GRID_API SphereGridTopology : public Gri
 public:
     SOFA_CLASS(SphereGridTopology,GridTopology);
 
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
 protected:
     /// Default constructor
     SphereGridTopology();

@@ -78,11 +78,6 @@ GearSpringForceField<DataTypes>::GearSpringForceField(MechanicalState* object1, 
     , lastTime((Real)0.0)
     , d_showFactorSize(initData(&d_showFactorSize, (Real)1.0, "showFactorSize", "modify the size of the debug information of a given factor" ))
 {
-    springs.setOriginalData(&d_springs);
-    f_filename.setParent(&d_filename);
-    f_period.setOriginalData(&d_period);
-    f_reinit.setOriginalData(&d_reinit);
-    showFactorSize.setOriginalData(&d_showFactorSize);
 }
 
 template<class DataTypes>
@@ -120,8 +115,8 @@ void GearSpringForceField<DataTypes>::init()
 template <class DataTypes>
 void GearSpringForceField<DataTypes>::reinit()
 {
-    const VecCoord& x1=this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& x2=this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x1=this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& x2=this->mstate2->read(core::vec_id::read_access::position)->getValue();
     sofa::type::vector<Spring> &springsVector=*(d_springs.beginEdit());
     for (unsigned int i=0; i < d_springs.getValue().size(); ++i)
     {
@@ -333,8 +328,8 @@ void GearSpringForceField<DataTypes>::draw(const core::visual::VisualParams* vpa
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 
-    const VecCoord& p1 =this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& p2 =this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p1 =this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& p2 =this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
     vparams->drawTool()->disableLighting();
     constexpr const sofa::type::RGBAColor& color = sofa::type::RGBAColor::yellow();

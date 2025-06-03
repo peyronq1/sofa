@@ -33,12 +33,15 @@ using sofa::helper::system::PluginManager;
 namespace sofa::simulation
 {
 
-int RequiredPluginClass = core::RegisterObject("Load the required plugins")
-        .add< RequiredPlugin >();
+void registerRequiredPlugin(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Load the SOFA modules and/or plugins required to run a simulation.")
+        .add< RequiredPlugin >());
+}
 
 RequiredPlugin::RequiredPlugin()
     : d_pluginName( initData(&d_pluginName, "pluginName", "plugin name (or several names if you need to load different plugins or a plugin with several alternate names)"))
-    , d_suffixMap ( initData(&d_suffixMap , "suffixMap", "standard->custom suffixes pairs (to be used if the plugin is compiled outside of Sofa with a non standard way of differenciating versions), using ! to represent empty suffix"))
+    , d_suffixMap ( initData(&d_suffixMap , "suffixMap", "standard->custom suffixes pairs (to be used if the plugin is compiled outside of Sofa with a non standard way of differentiating versions), using ! to represent empty suffix"))
     , d_stopAfterFirstNameFound( initData(&d_stopAfterFirstNameFound , false, "stopAfterFirstNameFound", "Stop after the first plugin name that is loaded successfully"))
     , d_stopAfterFirstSuffixFound( initData(&d_stopAfterFirstSuffixFound , true, "stopAfterFirstSuffixFound", "For each plugin name, stop after the first suffix that is loaded successfully"))
     , d_requireOne ( initData(&d_requireOne , false, "requireOne", "Display an error message if no plugin names were successfully loaded"))
@@ -133,17 +136,16 @@ bool RequiredPlugin::loadPlugin()
                 objectFactory->registerObjectsFromPlugin(name);
 
                 // fail-safe to check if potential components have been registered (implicitly or explicitly)
-                // SOFA_ATTRIBUTE_DEPRECATED__REGISTEROBJECT()
                 std::vector<sofa::core::ObjectFactory::ClassEntry::SPtr> entries;
                 objectFactory->getEntriesFromTarget(entries, name);
 
                 if (entries.empty())
                 {
-//                    msg_warning() << "No component has been registered from " << name << ".\n"
-//                        << "It could be because: \n"
-//                        << " - the entrypoint registerObjects() has not been implemented;\n"
-//                        << " - (deprecated) no sofa::core::RegisterObject() has been called;\n"
-//                        << " - your plugin does not add any component (i.e BaseObject) into the factory. In that case, RequiredPlugin is not useful for this kind of plugin.";
+                    msg_warning() << "No component has been registered from " << name << ".\n"
+                        << "It could be because: \n"
+                        << " - the entrypoint registerObjects() has not been implemented;\n"
+                        << " - (deprecated since v24.12) no sofa::core::RegisterObject() has been called;\n"
+                        << " - your plugin does not add any component (i.e BaseObject) into the factory. In that case, RequiredPlugin is not useful for this kind of plugin.";
                 }
 
                 if (d_stopAfterFirstSuffixFound.getValue()) break;

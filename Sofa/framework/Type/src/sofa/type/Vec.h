@@ -482,7 +482,7 @@ public:
     /// Use l<0 for the infinite norm.
     ValueType lNorm( int l ) const
     {
-        if( l==2 ) return norm(); // euclidian norm
+        if( l==2 ) return norm(); // euclidean norm
         else if( l<0 ) // infinite norm
         {
             ValueType n=0;
@@ -613,6 +613,30 @@ public:
         return elems[i];
     }
 
+    template< std::size_t I >
+    [[nodiscard]] constexpr reference get() & noexcept requires( I < N )
+    {
+        return elems[I];
+    }
+
+    template< std::size_t I >
+    [[nodiscard]] constexpr const_reference get() const& noexcept requires( I < N )
+    {
+        return elems[I];
+    }
+
+    template< std::size_t I >
+    [[nodiscard]] constexpr ValueType&& get() && noexcept requires( I < N )
+    {
+        return std::move(elems[I]);
+    }
+
+    template< std::size_t I >
+    [[nodiscard]] constexpr const ValueType&& get() const&& noexcept requires( I < N )
+    {
+        return std::move(elems[I]);
+    }
+
     // direct access to data
     constexpr const ValueType* data() const noexcept
     {
@@ -657,8 +681,8 @@ public:
     /// @}
 };
 
-
-
+template <class First, class... Rest>
+Vec(First, Rest...) -> Vec<1 + sizeof...(Rest), std::common_type_t<First, Rest...> >;
 
 /// Same as Vec except the values are not initialized by default
 template <sofa::Size N, typename real>
@@ -687,6 +711,9 @@ public:
         return v*r;
     }
 };
+
+template <class First, class... Rest>
+VecNoInit(First, Rest...) -> VecNoInit<1 + sizeof...(Rest), std::common_type_t<First, Rest...> >;
 
 /// Read from an input stream
 template<sofa::Size N,typename Real>
@@ -780,6 +807,15 @@ struct less< sofa::type::Vec<N,T> >
         }
         return false;
     }
+};
+
+template<sofa::Size N, class T>
+struct tuple_size<::sofa::type::Vec<N,T> > : integral_constant<size_t, N> {};
+
+template<std::size_t I, sofa::Size N, class T >
+struct tuple_element<I, ::sofa::type::Vec<N,T> >
+{
+    using type = T;
 };
 
 } // namespace std

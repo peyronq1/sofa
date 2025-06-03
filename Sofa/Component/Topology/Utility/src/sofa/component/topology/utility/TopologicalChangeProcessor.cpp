@@ -50,11 +50,11 @@ namespace sofa::component::topology::utility
 using namespace sofa::type;
 using namespace defaulttype;
 
-
-
-int TopologicalChangeProcessorClass = core::RegisterObject("Read topological Changes and process them.")
-        .add< TopologicalChangeProcessor >();
-
+void registerTopologicalChangeProcessor(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Read topological changes and process them.")
+        .add< TopologicalChangeProcessor >());
+}
 
 TopologicalChangeProcessor::TopologicalChangeProcessor()
     : d_filename(initData(&d_filename, "filename", "input file name for topological changes."))
@@ -85,24 +85,6 @@ TopologicalChangeProcessor::TopologicalChangeProcessor()
     , loopTime(0)
 {
     this->f_listening.setValue(true);
-    m_filename.setParent(&d_filename);
-    m_listChanges.setOriginalData(&d_listChanges);
-    m_interval.setOriginalData(&d_interval);
-    m_shift.setOriginalData(&d_shift);
-    m_loop.setOriginalData(&d_loop);
-    m_useDataInputs.setOriginalData(&d_useDataInputs);
-    m_timeToRemove.setOriginalData(&d_timeToRemove);
-    m_pointsToRemove.setOriginalData(&d_pointsToRemove);
-    m_edgesToRemove.setOriginalData(&d_edgesToRemove);
-    m_trianglesToRemove.setOriginalData(&d_trianglesToRemove);
-    m_quadsToRemove.setOriginalData(&d_quadsToRemove);
-    m_tetrahedraToRemove.setOriginalData(&d_tetrahedraToRemove);
-    m_hexahedraToRemove.setOriginalData(&d_hexahedraToRemove);
-    m_saveIndicesAtInit.setOriginalData(&d_saveIndicesAtInit);
-    m_epsilonSnapPath.setOriginalData(&d_epsilonSnapPath);
-    m_epsilonSnapBorder.setOriginalData(&d_epsilonSnapBorder);
-    m_draw.setOriginalData(&d_draw);
-
 }
 
 
@@ -723,7 +705,7 @@ void TopologicalChangeProcessor::processTopologicalChanges()
                     core::behavior::MechanicalState<Vec3Types> * mstate =
                         m_topology->getContext()->get< core::behavior::MechanicalState<Vec3Types> > ();
                     //get the coordinates of the mechanical state
-                    const auto &v_coords = mstate->read(core::ConstVecCoordId::position())->getValue();
+                    const auto &v_coords = mstate->read(core::vec_id::read_access::position)->getValue();
                     a = v_coords[a_last];
                 }
 
@@ -1289,7 +1271,7 @@ void TopologicalChangeProcessor::inciseWithSavedIndices()
         {
             const core::behavior::MechanicalState<Vec3Types>* mstate = m_topology->getContext()->get<core::behavior::MechanicalState<Vec3Types> >();
             //get the coordinates of the mechanical state
-            const auto &v_coords =  mstate->read(core::ConstVecCoordId::position())->getValue();
+            const auto &v_coords =  mstate->read(core::vec_id::read_access::position)->getValue();
             a = v_coords[a_last];
         }
 

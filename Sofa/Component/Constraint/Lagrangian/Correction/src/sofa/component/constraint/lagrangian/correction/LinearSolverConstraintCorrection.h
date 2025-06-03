@@ -62,10 +62,11 @@ public:
 protected:
     LinearSolverConstraintCorrection(sofa::core::behavior::MechanicalState<DataTypes> *mm = nullptr);
 
-    virtual ~LinearSolverConstraintCorrection();
+    ~LinearSolverConstraintCorrection() override;
 public:
     void init() override;
 
+    void addRegularization(linearalgebra::BaseMatrix* W);
 
     void addComplianceInConstraintSpace(const sofa::core::ConstraintParams *cparams, linearalgebra::BaseMatrix* W) override;
 
@@ -81,6 +82,7 @@ public:
 
     void rebuildSystem(SReal massFactor, SReal forceFactor) override;
 
+
     /// @name Deprecated API
     /// @{
 
@@ -94,6 +96,7 @@ public:
     /// @{
 
     Data< bool > wire_optimization; ///< constraints are reordered along a wire-like topology (from tip to base)
+    Data< SReal > d_regularizationTerm; ///< add regularization*Id to W when solving for constraints
     SingleLink<LinearSolverConstraintCorrection, sofa::core::behavior::LinearSolver, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_linearSolver; ///< Link towards the linear solver used to compute the compliance matrix, requiring the inverse of the linear system matrix
     SingleLink<LinearSolverConstraintCorrection, sofa::core::behavior::OdeSolver, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_ODESolver; ///< Link towards the ODE solver used to recover the integration factors
 
@@ -110,13 +113,20 @@ public:
     void getBlockDiagonalCompliance(linearalgebra::BaseMatrix* W, int begin, int end) override;
 
 protected:
-    linearalgebra::SparseMatrix<SReal> J; ///< constraint matrix
-    linearalgebra::FullVector<SReal> F; ///< forces computed from the constraints
+    //SOFA_ATTRIBUTE_DEPRECATED("v25.06", "v25.12", "Further to #5017 use m_constraintMatrix instead")
+    DeprecatedAndRemoved J; ///< use m_constraintMatrix instead
+
+    linearalgebra::SparseMatrix<Real> m_constraintJacobian;
 
     /**
-    * @brief Compute the compliance matrix
+    * @brief Convert the constraint matrix
     */
-    virtual void computeJ(sofa::linearalgebra::BaseMatrix* W, const MatrixDeriv& j);
+    void convertConstraintMatrix(sofa::SignedIndex numberOfConstraints, const MatrixDeriv& inputConstraintMatrix);
+
+    virtual void computeJ(sofa::linearalgebra::BaseMatrix* W, const MatrixDeriv& j)
+    {
+        convertConstraintMatrix(W->rowSize(), j);
+    }
 
 
     ////////////////////////// Inherited attributes ////////////////////////////

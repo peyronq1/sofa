@@ -90,14 +90,14 @@ template<class DataTypes>
 void ConstantForceField<DataTypes>::init()
 {
     this->d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
-       
+
+    /// Check link to topology
     if (l_topology.empty())
     {
         msg_info() << "link to Topology container should be set to ensure right behavior. First Topology found in current context will be used.";
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    // temprory pointer to topology
     if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
@@ -113,7 +113,6 @@ void ConstantForceField<DataTypes>::init()
         const core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
         m_systemSize = state->getSize();
     }
-
 
 
     /// Check on data isSet()
@@ -464,7 +463,7 @@ void ConstantForceField<DataTypes>::draw(const core::visual::VisualParams* vpara
 
     const VecIndex& indices = d_indices.getValue();
     const VecDeriv& f = d_forces.getValue();
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     if( fabs(aSC)<1.0e-10 )
     {

@@ -144,10 +144,6 @@ LCPForceFeedback<DataTypes>::LCPForceFeedback()
     _timer = new helper::system::thread::CTime();
     time_buf = _timer->getTime();
     timer_iterations = 0;
-
-    forceCoef.setOriginalData(&d_forceCoef);
-    solverTimeout.setOriginalData(&d_solverTimeout);
-
 }
 
 
@@ -371,13 +367,13 @@ void LCPForceFeedback<DataTypes>::handleEvent(sofa::core::objectmodel::Event *ev
     mCP[buf_index] = new_cp;
 
     // Update Val
-    val = mState->read(sofa::core::VecCoordId::freePosition())->getValue();
+    val = mState->read(sofa::core::vec_id::write_access::freePosition)->getValue();
 
     // Update constraints and id_buf
     constraints.clear();
     //	id_buf.clear();
 
-    const MatrixDeriv& c = mState->read(core::ConstMatrixDerivId::constraintJacobian())->getValue()   ;
+    const MatrixDeriv& c = mState->read(core::vec_id::read_access::constraintJacobian)->getValue()   ;
 
     MatrixDerivRowConstIterator rowItEnd = c.end();
 

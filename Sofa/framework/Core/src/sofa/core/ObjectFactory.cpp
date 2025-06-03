@@ -37,7 +37,7 @@ ObjectFactory::~ObjectFactory()
 
 ObjectFactory::ClassEntry& ObjectFactory::getEntry(std::string classname)
 {
-    if (registry.find(classname) == registry.end())
+    if (!registry.contains(classname))
     {
         registry[classname] = std::make_shared<ClassEntry>();
         registry[classname]->className = classname;
@@ -201,7 +201,7 @@ objectmodel::BaseObject::SPtr ObjectFactory::createObject(objectmodel::BaseConte
     {
         entry = it->second;
         // If no template has been given or if the template does not exist, first try with the default one
-        if(templatename.empty() || entry->creatorMap.find(templatename) == entry->creatorMap.end())
+        if(templatename.empty() || !entry->creatorMap.contains(templatename))
             templatename = entry->defaultTemplate;
 
 
@@ -238,21 +238,38 @@ objectmodel::BaseObject::SPtr ObjectFactory::createObject(objectmodel::BaseConte
         using sofa::helper::lifecycle::dealiasedComponents;
         if(it == registry.end())
         {
-            arg->logError("The object '" + classname + "' is not in the factory.");
+            arg->logError("The component '" + classname + "' cannot be found in the factory.");
             auto uncreatableComponent = uncreatableComponents.find(classname);
             auto movedComponent = movedComponents.find(classname);
             auto dealiasedComponent = dealiasedComponents.find(classname);
-            if( uncreatableComponent != uncreatableComponents.end() )
+
+            const bool isUncreatable =  uncreatableComponent != uncreatableComponents.end();
+            const bool isMoved = movedComponent != movedComponents.end();
+            const bool isDealiased = dealiasedComponent != dealiasedComponents.end();
+
+            const bool multipleReasons = static_cast<std::size_t>(isUncreatable) + static_cast<std::size_t>(isMoved) + static_cast<std::size_t>(isDealiased) > 1;
+            std::size_t reasonNumber = 1;
+            const auto number = [&reasonNumber, multipleReasons]() -> std::string
             {
-                arg->logError( uncreatableComponent->second.getMessage() );
+                return multipleReasons ? std::to_string(reasonNumber++) + ") " : "";
+            };
+
+            if (multipleReasons)
+            {
+                arg->logError("Several reasons are possible:");
             }
-            else if (movedComponent != movedComponents.end())
+
+            if(isUncreatable)
             {
-                arg->logError( movedComponent->second.getMessage() );
+                arg->logError(number() + uncreatableComponent->second.getMessage() );
             }
-            else if (dealiasedComponent != dealiasedComponents.end())
+            if (isMoved)
             {
-                arg->logError(dealiasedComponent->second.getMessage());
+                arg->logError(number() + movedComponent->second.getMessage() );
+            }
+            if (isDealiased)
+            {
+                arg->logError(number() + dealiasedComponent->second.getMessage());
             }
             else
             {
@@ -669,7 +686,7 @@ ObjectRegistrationData& ObjectRegistrationData::addCreator(std::string classname
     {
         msg_error("ObjectFactory") << "Template already instantiated with a different classname: " << entry.className << " != " << classname;
     }
-    else if (entry.creatorMap.find(templatename) != entry.creatorMap.end())
+    else if (entry.creatorMap.contains(templatename))
     {
         msg_error("ObjectFactory") << "Component already registered: " << classname << "<" << templatename << ">";
     }
@@ -723,7 +740,7 @@ bool ObjectRegistrationData::commitTo(sofa::core::ObjectFactory* objectFactory) 
 
         for (const auto & alias : entry.aliases)
         {
-            if (reg.aliases.find(alias) == reg.aliases.end())
+            if (!reg.aliases.contains(alias))
             {
                 objectFactory->addAlias(alias,entry.className);
             }
@@ -756,9 +773,11 @@ bool ObjectFactory::registerObjectsFromPlugin(const std::string& pluginName)
     }
 
     // do not register if it was already done before
-    if(m_registeredPluginSet.count(pluginName) > 0)
+    if(m_registeredPluginSet.contains(pluginName))
     {
-        // msg_warning("ObjectFactory") << pluginName << " has already registered its components.";
+        // This warning should be generalized (i.e not only in dev mode) when runSofa will not auto-load modules/plugins by default anymore
+        // Commented warning since it is triggered even for SOFA meta-modules (e.g. Sofa.Components)
+        // dmsg_warning("ObjectFactory") << pluginName << " has already registered its components.";
         return false;
     }
 
@@ -820,8 +839,8 @@ RegisterObject& RegisterObject::addCreator(std::string classname, std::string te
 
 RegisterObject::operator int() const
 {
-    //std::cout << "Implicit object registration is deprecrated since v24.06. Check #4429 for more information." << std::endl;
-    // msg_warning("RegisterObject") << "Implicit object registration is deprecrated since v24.06. Check #4429 for more information.";
+    dmsg_warning("RegisterObject") << m_objectRegistrationdata.entry.className
+                                  << ": Implicit object registration is deprecated since v24.12. Check #4429 for more information.";
     return commitTo(ObjectFactory::getInstance());
 }
 

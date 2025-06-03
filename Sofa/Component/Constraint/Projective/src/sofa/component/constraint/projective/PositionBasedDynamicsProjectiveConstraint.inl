@@ -38,10 +38,6 @@ PositionBasedDynamicsProjectiveConstraint<DataTypes>::PositionBasedDynamicsProje
     , d_velocity(initData(&d_velocity, "velocity", "Velocities."))
     , d_old_position(initData(&d_old_position, "old_position", "Old positions."))
 {
-    stiffness.setOriginalData(&d_stiffness);
-    position.setOriginalData(&d_position);
-    velocity.setOriginalData(&d_velocity);
-    old_position.setOriginalData(&d_old_position);
 }
 
 
@@ -77,7 +73,7 @@ void PositionBasedDynamicsProjectiveConstraint<DataTypes>::reset()
 	std::fill(vel.begin(),vel.end(),Deriv());
 
 	helper::WriteAccessor<DataVecCoord> old_pos (d_old_position );
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 	old_pos.resize(x.size());
 	std::copy(x.begin(),x.end(),old_pos.begin());
 }

@@ -161,7 +161,7 @@ void PolynomialSpringsForceField<DataTypes>::recomputeIndices()
 
     if (m_firstObjectIndices.size() > m_secondObjectIndices.size())
     {
-        msg_error() << "Error : the dimention of the source and the targeted points are different ";
+        msg_error() << "Error : the dimension of the source and the targeted points are different ";
         m_firstObjectIndices.clear();
         m_secondObjectIndices.clear();
     }
@@ -339,8 +339,8 @@ void PolynomialSpringsForceField<DataTypes>::draw(const core::visual::VisualPara
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 
-    const VecCoord& p1 =this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& p2 =this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p1 =this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& p2 =this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
     const VecIndex& firstObjectIndices = d_firstObjectPoints.getValue();
     const VecIndex& secondObjectIndices = d_secondObjectPoints.getValue();

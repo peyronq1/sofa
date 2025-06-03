@@ -74,7 +74,7 @@ public:
      * Rebuild the system using a mass and force factor.
      * Experimental API used to investigate convergence issues.
      */
-    virtual void rebuildSystem(SReal /*massfactor*/, SReal /*forceFactor*/){}
+    SOFA_ATTRIBUTE_DEPRECATED__REBUILDSYSTEM() virtual void rebuildSystem(SReal /*massfactor*/, SReal /*forceFactor*/){}
 
     /**
      * Use the system previously built and solve it with the appropriate algorithm
@@ -99,12 +99,12 @@ public:
     /// @{
     virtual MultiVecDerivId getLambda() const
     {
-        return MultiVecDerivId(VecDerivId::externalForce());
+        return MultiVecDerivId(vec_id::write_access::externalForce);
     }
 
     virtual MultiVecDerivId getDx() const
     {
-        return MultiVecDerivId(VecDerivId::dx());
+        return MultiVecDerivId(vec_id::write_access::dx);
     }
     /// @}
 

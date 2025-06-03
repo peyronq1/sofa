@@ -128,7 +128,7 @@ UncoupledConstraintCorrection<DataTypes>::UncoupledConstraintCorrection(sofa::co
         else
         {
             // Case: soft body
-            if constexpr (!sofa::type::isRigidType<DataTypes>())
+            if constexpr (!sofa::type::isRigidType<DataTypes>)
             {
                 const VecReal &comp = d_compliance.getValue();
                 if (std::any_of(comp.begin(), comp.end(), [](const Real c) { return c == 0; }))
@@ -173,11 +173,6 @@ UncoupledConstraintCorrection<DataTypes>::UncoupledConstraintCorrection(sofa::co
 
     }, {}
     );
-
-    compliance.setOriginalData(&d_compliance);
-    defaultCompliance.setOriginalData(&d_defaultCompliance);
-    f_verbose.setOriginalData(&d_verbose);
-
 }
 
 template<class DataTypes>
@@ -196,7 +191,7 @@ void UncoupledConstraintCorrection<DataTypes>::init()
         msg_warning() << "Neither the \'defaultCompliance\' nor the \'compliance\' data is set, please set one to define your compliance matrix";
     }
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     if (d_compliance.getValue().size() == 1 && d_defaultCompliance.isSet() && d_defaultCompliance.getValue() == d_compliance.getValue()[0])
     {
@@ -289,7 +284,7 @@ void UncoupledConstraintCorrection<DataTypes>::getComplianceWithConstraintMerge(
     if(!this->isComponentStateValid())
         return;
 
-    helper::WriteAccessor<Data<MatrixDeriv> > constraintsData = *this->mstate->write(core::MatrixDerivId::constraintJacobian());
+    helper::WriteAccessor<Data<MatrixDeriv> > constraintsData = *this->mstate->write(core::vec_id::write_access::constraintJacobian);
     MatrixDeriv& constraints = constraintsData.wref();
 
     MatrixDeriv constraintCopy;
@@ -362,28 +357,15 @@ void UncoupledConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(co
     if(!this->isComponentStateValid())
         return;
 
-    const MatrixDeriv& constraints = cparams->readJ(this->mstate)->getValue() ;
+    const MatrixDeriv& constraints = cparams->readJ(this->mstate.get())->getValue() ;
     VecReal comp = d_compliance.getValue();
     Real comp0 = d_defaultCompliance.getValue();
     const bool verbose = d_verbose.getValue();
     const bool useOdeIntegrationFactors = d_useOdeSolverIntegrationFactors.getValue();
     // use the OdeSolver to get the position integration factor
-    SReal factor = 1.0;
-    switch (cparams->constOrder())
-    {
-    case core::ConstraintOrder::POS_AND_VEL :
-    case core::ConstraintOrder::POS :
-        factor = useOdeIntegrationFactors ? m_pOdeSolver->getPositionIntegrationFactor() : 1.0;
-        break;
-
-    case core::ConstraintOrder::ACC :
-    case core::ConstraintOrder::VEL :
-        factor = useOdeIntegrationFactors ? m_pOdeSolver->getVelocityIntegrationFactor() : 1.0;
-        break;
-
-    default :
-        break;
-    }
+    const SReal factor = useOdeIntegrationFactors ?
+        core::behavior::BaseConstraintCorrection::correctionFactor(m_pOdeSolver, cparams->constOrder())
+        : 1.0;
 
     comp0 *= Real(factor);
     for(Size i=0;i<comp.size(); ++i)
@@ -538,8 +520,8 @@ void UncoupledConstraintCorrection<DataTypes>::applyMotionCorrection(const core:
     VecCoord& x = *x_d.beginEdit();
     VecDeriv& v = *v_d.beginEdit();
 
-    const VecCoord& x_free = cparams->readX(this->mstate)->getValue();
-    const VecDeriv& v_free = cparams->readV(this->mstate)->getValue();
+    const VecCoord& x_free = cparams->readX(this->mstate.get())->getValue();
+    const VecDeriv& v_free = cparams->readV(this->mstate.get())->getValue();
       
     const bool useOdeIntegrationFactors = d_useOdeSolverIntegrationFactors.getValue();
 
@@ -571,7 +553,7 @@ void UncoupledConstraintCorrection<DataTypes>::applyPositionCorrection(const cor
 
     VecCoord& x = *x_d.beginEdit();
 
-    const VecCoord& x_free = cparams->readX(this->mstate)->getValue();
+    const VecCoord& x_free = cparams->readX(this->mstate.get())->getValue();
 
     const bool useOdeIntegrationFactors = d_useOdeSolverIntegrationFactors.getValue();
 
@@ -599,7 +581,7 @@ void UncoupledConstraintCorrection<DataTypes>::applyVelocityCorrection(const cor
 
     VecDeriv& v = *v_d.beginEdit();
 
-    const VecDeriv& v_free = cparams->readV(this->mstate)->getValue();
+    const VecDeriv& v_free = cparams->readV(this->mstate.get())->getValue();
 
     const bool useOdeIntegrationFactors = d_useOdeSolverIntegrationFactors.getValue();
 
@@ -622,13 +604,13 @@ void UncoupledConstraintCorrection<DataTypes>::applyContactForce(const linearalg
     if(!this->isComponentStateValid())
         return;
 
-    helper::WriteAccessor<Data<VecDeriv> > forceData = *this->mstate->write(core::VecDerivId::externalForce());
+    helper::WriteAccessor<Data<VecDeriv> > forceData = *this->mstate->write(core::vec_id::write_access::externalForce);
     VecDeriv& force = forceData.wref();
-    const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv& constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
     const VecReal& comp = d_compliance.getValue();
     const Real comp0 = d_defaultCompliance.getValue();
 
-    force.resize((this->mstate->read(core::ConstVecCoordId::position())->getValue()).size());
+    force.resize((this->mstate->read(core::vec_id::read_access::position)->getValue()).size());
 
     MatrixDerivRowConstIterator rowItEnd = constraints.end();
 
@@ -648,14 +630,14 @@ void UncoupledConstraintCorrection<DataTypes>::applyContactForce(const linearalg
     }
 
 
-    helper::WriteAccessor<Data<VecDeriv> > dxData = *this->mstate->write(core::VecDerivId::dx());
+    helper::WriteAccessor<Data<VecDeriv> > dxData = *this->mstate->write(core::vec_id::write_access::dx);
     VecDeriv& dx = dxData.wref();
-    helper::WriteAccessor<Data<VecCoord> > xData = *this->mstate->write(core::VecCoordId::position());
+    helper::WriteAccessor<Data<VecCoord> > xData = *this->mstate->write(core::vec_id::write_access::position);
     VecCoord& x = xData.wref();
-    helper::WriteAccessor<Data<VecDeriv> > vData = *this->mstate->write(core::VecDerivId::velocity());
+    helper::WriteAccessor<Data<VecDeriv> > vData = *this->mstate->write(core::vec_id::write_access::velocity);
     VecDeriv& v = vData.wref();
-    const VecDeriv& v_free = this->mstate->read(core::ConstVecDerivId::freeVelocity())->getValue();
-    const VecCoord& x_free = this->mstate->read(core::ConstVecCoordId::freePosition())->getValue();
+    const VecDeriv& v_free = this->mstate->read(core::vec_id::read_access::freeVelocity)->getValue();
+    const VecCoord& x_free = this->mstate->read(core::vec_id::read_access::freePosition)->getValue();
 
     const bool useOdeIntegrationFactors = d_useOdeSolverIntegrationFactors.getValue();
 
@@ -683,7 +665,7 @@ void UncoupledConstraintCorrection<DataTypes>::applyContactForce(const linearalg
 template<class DataTypes>
 void UncoupledConstraintCorrection<DataTypes>::resetContactForce()
 {
-    helper::WriteAccessor<Data<VecDeriv> > forceData = *this->mstate->write(core::VecDerivId::externalForce());
+    helper::WriteAccessor<Data<VecDeriv> > forceData = *this->mstate->write(core::vec_id::write_access::externalForce);
     VecDeriv& force = forceData.wref();
 
     for (unsigned i = 0; i < force.size(); ++i)
@@ -697,7 +679,7 @@ void UncoupledConstraintCorrection<DataTypes>::resetContactForce()
 template<class DataTypes>
 bool UncoupledConstraintCorrection<DataTypes>::hasConstraintNumber(int index)
 {
-    const MatrixDeriv &constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv &constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
 
     return (constraints.readLine(index) != constraints.end());
 }
@@ -706,7 +688,7 @@ bool UncoupledConstraintCorrection<DataTypes>::hasConstraintNumber(int index)
 template<class DataTypes>
 void UncoupledConstraintCorrection<DataTypes>::resetForUnbuiltResolution(SReal * f, std::list<unsigned int>& /*renumbering*/)
 {
-    const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv& constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
 
     constraint_disp.clear();
     constraint_disp.resize(this->mstate->getSize());
@@ -753,7 +735,7 @@ void UncoupledConstraintCorrection<DataTypes>::addConstraintDisplacement(SReal *
     if(!this->isComponentStateValid())
         return;
 
-    const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv& constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
 
     for (int id = begin; id <= end; id++)
     {
@@ -783,7 +765,7 @@ void UncoupledConstraintCorrection<DataTypes>::setConstraintDForce(SReal * df, i
     /// if update is true, it computes the displacements due to this delta of force.
     /// As the contact are uncoupled, a displacement is obtained only on dof involved with the constraints
 
-    const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv& constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
     const VecReal& comp = d_compliance.getValue();
     const Real comp0 = d_defaultCompliance.getValue();
 
@@ -820,7 +802,7 @@ void UncoupledConstraintCorrection<DataTypes>::setConstraintDForce(SReal * df, i
 template<class DataTypes>
 void UncoupledConstraintCorrection<DataTypes>::getBlockDiagonalCompliance(linearalgebra::BaseMatrix* W, int begin, int end)
 {
-    const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
+    const MatrixDeriv& constraints = this->mstate->read(core::vec_id::read_access::constraintJacobian)->getValue();
     const VecReal& comp = d_compliance.getValue();
     const Real comp0 = d_defaultCompliance.getValue();
 

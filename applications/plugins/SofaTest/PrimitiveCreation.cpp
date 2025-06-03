@@ -68,7 +68,7 @@ sofa::component::collision::geometry::TriangleCollisionModel<sofa::defaulttype::
 
     //editing DOF related to the TriangleCollisionModel<sofa::defaulttype::Vec3Types> to be created, size is 3 (3 points) because it contains just one Triangle
     triDOF->resize(3);
-    Data<MechanicalObject3::VecCoord> & dpositions = *triDOF->write( sofa::core::VecId::position() );
+    Data<MechanicalObject3::VecCoord> & dpositions = *triDOF->write( sofa::core::vec_id::write_access::position );
     MechanicalObject3::VecCoord & positions = *dpositions.beginEdit();
 
     //we finnaly edit the positions by filling it with a RigidCoord made up from p and the rotated fram x,y,z
@@ -78,8 +78,8 @@ sofa::component::collision::geometry::TriangleCollisionModel<sofa::defaulttype::
 
     dpositions.endEdit();
 
-    //Editting the velocity of the OBB
-    Data<MechanicalObject3::VecDeriv> & dvelocities = *triDOF->write( sofa::core::VecId::velocity() );
+    //Editing the velocity of the OBB
+    Data<MechanicalObject3::VecDeriv> & dvelocities = *triDOF->write( sofa::core::vec_id::write_access::velocity );
 
     MechanicalObject3::VecDeriv & velocities = *dvelocities.beginEdit();
     velocities[0] = v;
@@ -103,7 +103,7 @@ sofa::component::collision::geometry::TriangleCollisionModel<sofa::defaulttype::
     tri->addObject(triCollisionModel);
 
 
-    //editting the OBBModel
+    //editing the OBBModel
     triCollisionModel->init();
 
     return triCollisionModel;
@@ -119,7 +119,7 @@ sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Ri
 
     //editing DOF related to the OBBCollisionModel<sofa::defaulttype::Rigid3Types> to be created, size is 1 because it contains just one OBB
     sphereDOF->resize(1);
-    Data<MechanicalObjectRigid3::VecCoord> & dpositions = *sphereDOF->write( sofa::core::VecId::position() );
+    Data<MechanicalObjectRigid3::VecCoord> & dpositions = *sphereDOF->write( sofa::core::vec_id::write_access::position );
     MechanicalObjectRigid3::VecCoord & positions = *dpositions.beginEdit();
 
     //we create a frame that we will rotate like it is specified by the parameters angles and order
@@ -144,8 +144,8 @@ sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Ri
 
     dpositions.endEdit();
 
-    //Editting the velocity of the OBB
-    Data<MechanicalObjectRigid3::VecDeriv> & dvelocities = *sphereDOF->write( sofa::core::VecId::velocity() );
+    //Editing the velocity of the OBB
+    Data<MechanicalObjectRigid3::VecDeriv> & dvelocities = *sphereDOF->write( sofa::core::vec_id::write_access::velocity );
 
     MechanicalObjectRigid3::VecDeriv & velocities = *dvelocities.beginEdit();
     velocities[0] = v;
@@ -179,7 +179,7 @@ sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Ve
 
     //editing DOF related to the OBBCollisionModel<sofa::defaulttype::Rigid3Types> to be created, size is 1 because it contains just one OBB
     sphereDOF->resize(1);
-    Data<MechanicalObject3::VecCoord> & dpositions = *sphereDOF->write( sofa::core::VecId::position() );
+    Data<MechanicalObject3::VecCoord> & dpositions = *sphereDOF->write( sofa::core::vec_id::write_access::position );
     MechanicalObject3::VecCoord & positions = *dpositions.beginEdit();
 
     //we finnaly edit the positions by filling it with a RigidCoord made up from p and the rotated fram x,y,z
@@ -187,8 +187,8 @@ sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Ve
 
     dpositions.endEdit();
 
-    //Editting the velocity of the OBB
-    Data<MechanicalObject3::VecDeriv> & dvelocities = *sphereDOF->write( sofa::core::VecId::velocity() );
+    //Editing the velocity of the OBB
+    Data<MechanicalObject3::VecDeriv> & dvelocities = *sphereDOF->write( sofa::core::vec_id::write_access::velocity );
 
     MechanicalObject3::VecDeriv & velocities = *dvelocities.beginEdit();
     velocities[0] = v;
@@ -201,7 +201,7 @@ sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Ve
     sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Vec3Types>::SPtr sphereCollisionModel = New<sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Vec3Types>>();
     sphere->addObject(sphereCollisionModel);
 
-    //editting the RigidSphereModel
+    //editing the RigidSphereModel
     sphereCollisionModel->init();
     sofa::component::collision::geometry::SphereCollisionModel<sofa::defaulttype::Vec3Types>::VecReal & vecRad = *(sphereCollisionModel->radius.beginEdit());
 

@@ -57,25 +57,24 @@ void ForceField<DataTypes>::addDForce(const MechanicalParams* mparams, MultiVecD
     {
 
 #ifndef NDEBUG
-            mparams->setKFactorUsed(false);
+        mparams->setKFactorUsed(false);
 #endif
 
         addDForce(mparams, *dfId[this->mstate.get()].write(), *mparams->readDx(this->mstate.get()));
 
 #ifndef NDEBUG
         if (!mparams->getKFactorUsed())
-            msg_warning()  << getClassName() << " (in ForceField<DataTypes>::addDForce): please use mparams->kFactor() in addDForce";
+        {
+            static bool displayOnce = false;
+            if (!displayOnce)
+            {
+                msg_warning() << getClassName() << " (in ForceField<DataTypes>::addDForce): please use mparams->kFactor() in addDForce";
+                displayOnce = true;
+            }
+        }
 #endif
     }
 }
-
-template<class DataTypes>
-void ForceField<DataTypes>::addClambda(const MechanicalParams* /*mparams*/, DataVecDeriv& /*df*/, const DataVecDeriv& /*lambda*/, SReal /*cFactor*/ )
-{
-    msg_error()<<"function 'addClambda' is not implemented";
-}
-
-
 
 template<class DataTypes>
 SReal ForceField<DataTypes>::getPotentialEnergy(const MechanicalParams* mparams) const

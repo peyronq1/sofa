@@ -74,13 +74,17 @@ public:
     void checkCollisionPipelineWithMissingContactManager();
     int checkCollisionPipelineWithMonkeyValueForDepth(int value);
 
-    void SetUp() override
+    void doSetUp() override
     {
-        sofa::simpleapi::importPlugin("Sofa.Component.StateContainer"); 
-        sofa::simpleapi::importPlugin("Sofa.Component.Collision");
+        this->loadPlugins({
+            Sofa.Component.StateContainer,
+            Sofa.Component.Collision.Detection.Algorithm,
+            Sofa.Component.Collision.Detection.Intersection,
+            Sofa.Component.Collision.Response.Contact
+        });
     }
 
-    void TearDown() override
+    void doTearDown() override
     {
         if (root)
             sofa::simulation::node::unload(root);
@@ -269,7 +273,7 @@ TEST_F(TestCollisionPipeline, checkCollisionPipelineWithMonkeyValueForDepth_Open
             // Check the returned value.
             if(this->checkCollisionPipelineWithMonkeyValueForDepth(depthValue) != depthValue)
             {
-                ADD_FAILURE() << "User provided depth parameter value '" << depthValue << "' has been un-expectedly overriden." ;
+                ADD_FAILURE() << "User provided depth parameter value '" << depthValue << "' has been un-expectedly overridden." ;
             }
         }
         else

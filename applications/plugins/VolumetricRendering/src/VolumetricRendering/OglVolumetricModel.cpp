@@ -31,13 +31,14 @@
 #include <sofa/type/BoundingBox.h>
 #include <sofa/gl/component/shader/OglAttribute.inl>
 
-namespace sofa::component::visualmodel
+namespace volumetricrendering
 {
 
-int OglVolumetricModelClass = sofa::core::RegisterObject("Volumetric model for OpenGL display")
-.add < OglVolumetricModel >();
-
-
+void registerOglVolumetricModel(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Volumetric model for OpenGL display.")
+    .add < OglVolumetricModel >());
+}
 
 OglVolumetricModel::OglVolumetricModel()
     : d_tetrahedra(initData(&d_tetrahedra, "tetrahedra", "Tetrahedra to draw"))
@@ -71,7 +72,7 @@ void OglVolumetricModel::init()
 
   
 
-    //instanciate the mapping tables
+    //instantiate the mapping tables
     //Useful for the PT algorithm only
     sofa::type::vector<sofa::gl::component::shader::OglFloatVector4Variable::SPtr > listVec4Variables;
     this->getContext()->core::objectmodel::BaseContext::template get<sofa::gl::component::shader::OglFloatVector4Variable, sofa::type::vector<sofa::gl::component::shader::OglFloatVector4Variable::SPtr> >
@@ -94,7 +95,7 @@ void OglVolumetricModel::init()
 
     if (!m_mappingTableValues)
     {
-        msg_info() << "No MappingTable found, instanciating one";
+        msg_info() << "No MappingTable found, instantiating one";
         m_mappingTableValues = sofa::core::objectmodel::New<sofa::gl::component::shader::OglFloatVector4Variable>();
         m_mappingTableValues->setName("MappingTable");
         m_mappingTableValues->setID("MappingTable");
@@ -115,7 +116,7 @@ void OglVolumetricModel::init()
     }
     if (!m_runSelectTableValues)
     {
-        msg_info() << "No RunSelectTable found, instanciating one";
+        msg_info() << "No RunSelectTable found, instantiating one";
 
         m_runSelectTableValues = sofa::core::objectmodel::New<sofa::gl::component::shader::OglFloatVector4Variable>();
         m_runSelectTableValues->setName("RunSelectTable");
@@ -198,7 +199,7 @@ void OglVolumetricModel::doInitVisual(const core::visual::VisualParams* vparams)
     }
     if (!m_vertexColors)
     {
-        msg_error() << "No attributes called a_vertexColor found, instanciating one with a default color";
+        msg_error() << "No attributes called a_vertexColor found, instantiating one with a default color";
         m_vertexColors = sofa::core::objectmodel::New<sofa::gl::component::shader::OglFloat4Attribute>();
         m_vertexColors->setName("a_vertexColor");
         m_vertexColors->setID("a_vertexColor");
@@ -310,7 +311,6 @@ void OglVolumetricModel::computeMeshFromTopology()
 
 void OglVolumetricModel::splitHexahedra()
 {
-    helper::ReadAccessor< Data< type::vector<Tetrahedron> > > tetrahedra = d_tetrahedra;
     helper::ReadAccessor< Data< type::vector<Hexahedron> > > hexahedra = d_hexahedra;
     m_hexaToTetrahedra.clear();
 
@@ -452,7 +452,6 @@ void OglVolumetricModel::drawTransparent(const core::visual::VisualParams* vpara
     glEnableClientState(GL_VERTEX_ARRAY);
 
     const type::vector<Tetrahedron>& tetrahedra = d_tetrahedra.getValue();
-    const type::vector<Hexahedron>& hexahedra = d_hexahedra.getValue();
     //glEnable(GL_CLIP_DISTANCE0);
 
 
@@ -487,8 +486,11 @@ void OglVolumetricModel::drawTransparent(const core::visual::VisualParams* vpara
     glPopAttrib();
 }
 
-void OglVolumetricModel::computeBBox(const core::ExecParams * params, bool /* onlyVisible */)
+void OglVolumetricModel::computeBBox(const core::ExecParams * params, bool onlyVisible)
 {
+    SOFA_UNUSED(params);
+    SOFA_UNUSED(onlyVisible);
+
     //if (m_topology)
     {
         Coord v;
@@ -532,4 +534,4 @@ void OglVolumetricModel::updateVertexBuffer()
 
 }
 
-} // namespace sofa::component::visualmodel
+} // namespace volumetricrendering

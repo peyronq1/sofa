@@ -33,7 +33,7 @@ namespace
 }
 
 /** \brief Define a cylinder grid topology
- * Paramenters are its @sa d_radius and @sa d_length .
+ * Parameters are its @sa d_radius and @sa d_length .
  * Position and direction are set by @sa d_center and @sa d_axis
  * nz discretisation is along the cylinder axis
   */
@@ -41,7 +41,6 @@ class SOFA_COMPONENT_TOPOLOGY_CONTAINER_GRID_API CylinderGridTopology : public G
 {
 public:
     SOFA_CLASS(CylinderGridTopology,GridTopology);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
 
 protected:
     /// Default constructor

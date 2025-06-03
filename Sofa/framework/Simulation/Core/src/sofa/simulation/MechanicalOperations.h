@@ -28,6 +28,8 @@
 #include <sofa/core/behavior/MultiMatrixAccessor.h>
 #include <sofa/simulation/VisitorExecuteFunc.h>
 #include <sofa/core/ConstraintParams.h>
+#include <sofa/core/MatricesFactors.h>
+
 
 namespace sofa::simulation::common
 {
@@ -81,11 +83,11 @@ public:
     /// Compute the current force delta (given the latest propagated velocity)
     void computeDfV(core::MultiVecDerivId df, bool clear = true, bool accumulate = true);
     /// accumulate $ df += (m M + b B + k K) dx $ (given the latest propagated displacement)
-    void addMBKdx(core::MultiVecDerivId df, SReal m, SReal b, SReal k, bool clear = true, bool accumulate = true);
+    void addMBKdx(core::MultiVecDerivId df, core::MatricesFactors::M m, core::MatricesFactors::B b, core::MatricesFactors::K k, bool clear = true, bool accumulate = true);
     /// accumulate $ df += (m M + b B + k K) velocity $
-    void addMBKv(core::MultiVecDerivId df, SReal m, SReal b, SReal k, bool clear = true, bool accumulate = true);
+    void addMBKv(core::MultiVecDerivId df, core::MatricesFactors::M m, core::MatricesFactors::B b, core::MatricesFactors::K k, bool clear = true, bool accumulate = true);
     /// Add dt*Gravity to the velocity
-    void addSeparateGravity(SReal dt, core::MultiVecDerivId result = core::VecDerivId::velocity() );
+    void addSeparateGravity(SReal dt, core::MultiVecDerivId result = core::vec_id::write_access::velocity );
 
     void computeContactForce(core::MultiVecDerivId result);
     void computeContactDf(core::MultiVecDerivId df);
@@ -101,18 +103,18 @@ public:
 /// @{
 
     void resetSystem(core::behavior::LinearSolver* linearSolver);
-    void setSystemMBKMatrix(SReal mFact, SReal bFact, SReal kFact, core::behavior::LinearSolver* linearSolver);
+    void setSystemMBKMatrix(core::MatricesFactors::M m, core::MatricesFactors::B b, core::MatricesFactors::K k, core::behavior::LinearSolver* linearSolver);
     void setSystemRHVector(core::MultiVecDerivId v, core::behavior::LinearSolver* linearSolver);
     void setSystemLHVector(core::MultiVecDerivId v, core::behavior::LinearSolver* linearSolver);
     void solveSystem(core::behavior::LinearSolver* linearSolver);
     void print( std::ostream& out, core::behavior::LinearSolver* linearSolver);
 
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_RESETSYSTEM() void m_resetSystem();
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_SETSYSTEMMBKMATRIX() void m_setSystemMBKMatrix(SReal mFact, SReal bFact, SReal kFact);
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_SETSYSTEMRHVECTOR() void m_setSystemRHVector(core::MultiVecDerivId v);
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_SETSYSTEMLHVECTOR() void m_setSystemLHVector(core::MultiVecDerivId v);
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_SOLVESYSTEM() void m_solveSystem();
-    SOFA_ATTRIBUTE_DEPRECATED_MECHANICALOPERATIONS_PRINT() void m_print( std::ostream& out );
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_RESETSYSTEM() void m_resetSystem() = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_SETSYSTEMMBKMATRIX() void m_setSystemMBKMatrix(SReal mFact, SReal bFact, SReal kFact) = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_SETSYSTEMRHVECTOR() void m_setSystemRHVector(core::MultiVecDerivId v) = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_SETSYSTEMLHVECTOR() void m_setSystemLHVector(core::MultiVecDerivId v) = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_SOLVESYSTEM() void m_solveSystem() = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_PRINT() void m_print( std::ostream& out ) = delete;
 
     /// @}
 
@@ -148,6 +150,14 @@ public:
     void printWithElapsedTime( core::ConstMultiVecId v,  unsigned time, std::ostream& out=std::cerr );
 
     /// @}
+
+
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_ADDMBKDX()
+    void addMBKdx(core::MultiVecDerivId df, SReal m, SReal b, SReal k, bool clear = true, bool accumulate = true) = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_ADDMBKV()
+    void addMBKv(core::MultiVecDerivId df, SReal m, SReal b, SReal k, bool clear = true, bool accumulate = true) = delete;
+    SOFA_ATTRIBUTE_DISABLED_MECHANICALOPERATIONS_SETSYSTEMMBKMATRIX_OTHER()
+    void setSystemMBKMatrix(SReal mFact, SReal bFact, SReal kFact, core::behavior::LinearSolver* linearSolver) = delete;
 
 protected:
     VisitorExecuteFunc executeVisitor;

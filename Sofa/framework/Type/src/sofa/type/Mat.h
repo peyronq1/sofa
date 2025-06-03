@@ -192,7 +192,16 @@ public:
     template<typename real2>
     explicit constexpr Mat(const real2* p) noexcept
     {
-        std::copy(p, p+N, this->begin()->begin());
+        if constexpr (sizeof(real2) == sizeof(real))
+        {
+            std::copy_n(p, N, this->ptr());
+        }
+        else
+        {
+            for (Size l = 0; l < L; ++l)
+                for (Size c = 0; c < C; ++c)
+                    this->elems[l][c] = static_cast<real>(p[l*C + c]);
+        }
     }
 
     /// number of lines
@@ -201,7 +210,7 @@ public:
         return L;
     }
 
-    /// number of colums
+    /// number of columns
     constexpr Size getNbCols() const
     {
         return C;
@@ -211,7 +220,7 @@ public:
     /// Assignment from an array of elements (stored per line).
     constexpr void operator=(const real* p) noexcept
     {
-        std::copy(p, p+N, this->begin()->begin());
+        std::copy_n(p, N, this->ptr());
     }
 
     /// Assignment from another matrix
@@ -297,7 +306,7 @@ public:
         return c;
     }
 
-    /// Write acess to line i.
+    /// Write access to line i.
     constexpr LineNoInit& operator[](Size i) noexcept
     {
         return this->elems[i];
@@ -309,7 +318,7 @@ public:
         return this->elems[i];
     }
 
-    /// Write acess to line i.
+    /// Write access to line i.
     constexpr LineNoInit& operator()(Size i) noexcept
     {
         return this->elems[i];
@@ -376,7 +385,7 @@ public:
     /// Special access to second line (read-only).
     template<sofa::Size NbLine = L, typename = std::enable_if_t<NbLine >= 2> >
     constexpr const Line& y() const noexcept { return this->elems[1]; }
-    /// Special access to thrid line (read-only).
+    /// Special access to third line (read-only).
     template<sofa::Size NbLine = L, typename = std::enable_if_t<NbLine >= 3> >
     constexpr const Line& z() const noexcept { return this->elems[2]; }
     /// Special access to fourth line (read-only).
@@ -616,7 +625,7 @@ public:
         return r;
     }
 
-    /// Substraction with the transposed of the given matrix operator \returns this - mt
+    /// Subtraction with the transposed of the given matrix operator \returns this - mt
     constexpr Mat<L,C,real>minusTransposed(const Mat<C,L,real>& m) const noexcept
     {
         Mat<L,C,real> r(NOINIT);
@@ -682,7 +691,7 @@ public:
                 (*this)[i][j] += m[j][i];
     }
 
-    /// Substraction of the transposed of m
+    /// Subtraction of the transposed of m
     constexpr void subTransposed(const Mat<C,L,real>& m) noexcept
     {
         for(Size i=0; i<L; i++)
@@ -690,7 +699,7 @@ public:
                 (*this)[i][j] -= m[j][i];
     }
 
-    /// Substraction assignment operator.
+    /// Subtraction assignment operator.
     constexpr void operator -=(const Mat<L,C,real>& m) noexcept
     {
         for(Size i=0; i<L; i++)

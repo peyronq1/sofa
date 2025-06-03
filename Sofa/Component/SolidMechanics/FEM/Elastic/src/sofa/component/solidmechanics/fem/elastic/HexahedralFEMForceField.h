@@ -30,8 +30,6 @@
 
 #include <sofa/core/topology/TopologyData.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::solidmechanics::fem::elastic
 {
 
@@ -154,7 +152,7 @@ public:
         return 0.0;
     }
 
-    void addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
     void buildStiffnessMatrix(core::behavior::StiffnessMatrix* matrix) override;
 
     void buildDampingMatrix(core::behavior::DampingMatrix* /*matrix*/) final;
@@ -185,16 +183,6 @@ protected:
 public:
     int method;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<std::string> f_method;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<Real> f_poissonRatio;
-
-    SOFA_ATTRIBUTE_DISABLED("", "v24.12", "Use d_youngModulus instead") DeprecatedAndRemoved f_youngModulus;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<sofa::type::vector<HexahedronInformation> > hexahedronInfo;
 
     Data<std::string> d_method; ///< "large" or "polar" displacements
 

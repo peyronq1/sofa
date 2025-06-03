@@ -42,6 +42,7 @@ set(HEADER_FILES
     ${SRC_ROOT}/RandomGenerator.h
     ${SRC_ROOT}/SimpleTimer.h
     ${SRC_ROOT}/ScopedAdvancedTimer.h
+    ${SRC_ROOT}/SelectableItem.h
     ${SRC_ROOT}/SortedPermutation.h
     ${SRC_ROOT}/StringUtils.h
     ${SRC_ROOT}/TagFactory.h
@@ -55,8 +56,10 @@ set(HEADER_FILES
     ${SRC_ROOT}/init.h
     ${SRC_ROOT}/integer_id.h
     ${SRC_ROOT}/accessor/ReadAccessor.h
+    ${SRC_ROOT}/accessor/ReadAccessorFixedArray.h
     ${SRC_ROOT}/accessor/ReadAccessorVector.h
     ${SRC_ROOT}/accessor/WriteAccessor.h
+    ${SRC_ROOT}/accessor/WriteAccessorFixedArray.h
     ${SRC_ROOT}/accessor/WriteAccessorVector.h
     ${SRC_ROOT}/accessor/WriteOnlyAccessor.h
     ${SRC_ROOT}/io/BaseFileAccess.h
@@ -79,7 +82,6 @@ set(HEADER_FILES
     ${SRC_ROOT}/map.h
     ${SRC_ROOT}/map_ptr_stable_compare.h
     ${SRC_ROOT}/pair.h
-    ${SRC_ROOT}/proximity.h
     ${SRC_ROOT}/random.h
     ${SRC_ROOT}/rmath.h
     ${SRC_ROOT}/set.h
@@ -213,11 +215,6 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 if((CMAKE_SYSTEM_NAME STREQUAL Windows) AND SOFA_USE_DEPENDENCY_PACK)
     target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "$<INSTALL_INTERFACE:include/extlibs/WinDepPack>")
 endif()
-# The default binary suffix for libraries/plugins is "_d" when using a debug build.
-# since this is configuration specific it is a bit more convenient to put it as a debug compile definition for
-# PluginManager.cpp, at the expense of being much less visible compare to having it in the generated
-# SofaFramework/config.h
-set_property(SOURCE ${SRC_ROOT}/system/PluginManager.cpp APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG "SOFA_LIBSUFFIX=_d" )
 
 # DEPENDENCY LINKS AND INCLUDE DIRS
 target_link_libraries(${PROJECT_NAME} PUBLIC Sofa.Config )
@@ -259,6 +256,23 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "$<BUILD_INTERFACE:${ST
 
 # DiffLib (header only)
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "$<BUILD_INTERFACE:${difflib_INCLUDE_DIR}>")
+
+set(is_release "$<CONFIG:RELEASE>")
+set(is_debug "$<CONFIG:DEBUG>")
+set(is_relwithdebinfo "$<CONFIG:RELWITHDEBINFO>")
+set(is_minsizerel "$<CONFIG:MINSIZEREL>")
+# set the type of build as preprocessor value
+target_compile_definitions(${PROJECT_NAME} PRIVATE "$<${is_release}:SOFA_BUILD_CONFIGURATION=Release>")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "$<${is_debug}:SOFA_BUILD_CONFIGURATION=Debug>")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "$<${is_relwithdebinfo}:SOFA_BUILD_CONFIGURATION=RelWithDebInfo>")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "$<${is_minsizerel}:SOFA_BUILD_CONFIGURATION=MinSizeRel>")
+## if the type of build is something else (not supported), then SOFA_BUILD_CONFIGURATION wont be defined
+# it could be also useful to know if we are using a multi-config generator
+if(CMAKE_CONFIGURATION_TYPES)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE "SOFA_BUILD_MULTI_CONFIGURATION=1")
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE "SOFA_BUILD_MULTI_CONFIGURATION=0")
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER Sofa.Framework) # IDE folder
 

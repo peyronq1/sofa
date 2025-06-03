@@ -89,16 +89,6 @@ HexahedronFEMForceField<DataTypes>::HexahedronFEMForceField()
     _coef[7][2]=1;
 
     _alreadyInit=false;
-
-    f_method.setOriginalData(&d_method);
-    f_updateStiffnessMatrix.setOriginalData(&d_updateStiffnessMatrix);
-    _gatherPt.setOriginalData(&d_gatherPt);
-    _gatherBsize.setOriginalData(&d_gatherBsize);
-    f_drawing.setOriginalData(&d_drawing);
-    f_drawPercentageOffset.setOriginalData(&d_drawPercentageOffset);
-    _elementStiffnesses.setOriginalData(&d_elementStiffnesses);
-    _initialPoints.setOriginalData(&d_initialPoints);
-
 }
 
 
@@ -139,7 +129,7 @@ void HexahedronFEMForceField<DataTypes>::init()
 template <class DataTypes>
 void HexahedronFEMForceField<DataTypes>::reinit()
 {
-    const VecCoord& p = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& p = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
     d_initialPoints.setValue(p);
 
     _materialsStiffnesses.resize(this->getIndexedElements()->size() );
@@ -308,7 +298,7 @@ const typename HexahedronFEMForceField<DataTypes>::Transformation& HexahedronFEM
 /////////////////////////////////////////////////
 // enable to use generic matrix computing code instead of the original optimized code specific to parallelepipeds
 #define GENERIC_STIFFNESS_MATRIX
-// enable to use the full content of the MaterialStiffness matrix, instead of only the 3x3 upper bloc
+// enable to use the full content of the MaterialStiffness matrix, instead of only the 3x3 upper block
 #define MAT_STIFFNESS_USE_W
 // enable to use J when computing qx/qy/qz, instead of computing the matrix relative to (x1,x2,x3) and pre/post multiply by J^-1 afterward.
 // note that this does not matter if the element is a cube.
@@ -985,14 +975,6 @@ void HexahedronFEMForceField<DataTypes>::getNodeRotation(Transformation& R, unsi
 }
 
 template<class DataTypes>
-SReal HexahedronFEMForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams* /*mparams*/,
-                                                             const DataVecCoord&  /* x */) const
-{
-    msg_warning() << "Method getPotentialEnergy not implemented yet.";
-    return 0.0;
-}
-
-template<class DataTypes>
 void HexahedronFEMForceField<DataTypes>::getRotations(linearalgebra::BaseMatrix * rotations,int offset)
 {
     auto nbdof = this->mstate->getSize();
@@ -1096,8 +1078,11 @@ void HexahedronFEMForceField<DataTypes>::accumulateForcePolar( WDataRefVecDeriv 
 }
 
 template<class DataTypes>
-inline SReal HexahedronFEMForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams*) const
+inline SReal HexahedronFEMForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const
 {
+    SOFA_UNUSED(mparams);
+    SOFA_UNUSED(x);
+
     return m_potentialEnergy;
 }
 
@@ -1125,12 +1110,9 @@ inline void HexahedronFEMForceField<DataTypes>::setMethod(int val)
 
 
 template<class DataTypes>
-void HexahedronFEMForceField<DataTypes>::addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix)
+void HexahedronFEMForceField<DataTypes>::addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset)
 {
     // Build Matrix Block for this ForceField
-
-    sofa::core::behavior::MultiMatrixAccessor::MatrixRef r = matrix->getMatrix(this->mstate);
-    const Real kFactor = (Real)sofa::core::mechanicalparams::kFactorIncludingRayleighDamping(mparams, this->rayleighStiffness.getValue());
 
     sofa::Index e { 0 }; //index of the element in the topology
 
@@ -1157,7 +1139,7 @@ void HexahedronFEMForceField<DataTypes>::addKToMatrix(const core::MechanicalPara
                         Coord(Ke[3*n1+1][3*n2+0],Ke[3*n1+1][3*n2+1],Ke[3*n1+1][3*n2+2]),
                         Coord(Ke[3*n1+2][3*n2+0],Ke[3*n1+2][3*n2+1],Ke[3*n1+2][3*n2+2])) ) * Rot;
 
-                r.matrix->add( r.offset + 3 * node1, r.offset + 3 * node2, tmp * (-kFactor));
+                matrix->add( offset + 3 * node1, offset + 3 * node2, tmp * (-kFact));
             }
         }
     }
@@ -1205,7 +1187,7 @@ void HexahedronFEMForceField<DataTypes>::computeBBox(const core::ExecParams* par
 
     if( !onlyVisible ) return;
 
-    helper::ReadAccessor<DataVecCoord> x = this->mstate->read(core::VecCoordId::position());
+    helper::ReadAccessor<DataVecCoord> x = this->mstate->read(core::vec_id::write_access::position);
 
     static const Real max_real = std::numeric_limits<Real>::max();
     static const Real min_real = std::numeric_limits<Real>::lowest();
@@ -1235,7 +1217,7 @@ void HexahedronFEMForceField<DataTypes>::draw(const core::visual::VisualParams* 
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     vparams->drawTool()->setLightingEnabled(false);
 

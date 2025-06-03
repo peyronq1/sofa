@@ -464,7 +464,7 @@ void SpringForceField<DataTypes>::initializeTopologyHandler(sofa::core::topology
                     d_springs.cleanDirty();
                     //Clean the indices list of the unmodified topology to match the size of the newly modified one
                     updateTopologyIndicesFromSprings();
-                    //Clean dirtyness of springs because we just updated the indices lists from the spring data itself
+                    //Clean dirtiness of springs because we just updated the indices lists from the spring data itself
                     d_springs.cleanDirty();
                     areSpringIndicesDirty = false;
                 }
@@ -808,8 +808,8 @@ void SpringForceField<DataTypes>::draw(const core::visual::VisualParams* vparams
     using namespace sofa::type;
 
     if (!((this->mstate1 == this->mstate2) ? vparams->displayFlags().getShowForceFields() : vparams->displayFlags().getShowInteractionForceFields())) return;
-    const VecCoord& p1 = this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& p2 = this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p1 = this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& p2 = this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 
@@ -915,8 +915,8 @@ void SpringForceField<DataTypes>::computeBBox(const core::ExecParams* params, bo
         return;
     }
 
-    const VecCoord& p1 = this->mstate1->read(core::ConstVecCoordId::position())->getValue();
-    const VecCoord& p2 = this->mstate2->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p1 = this->mstate1->read(core::vec_id::read_access::position)->getValue();
+    const VecCoord& p2 = this->mstate2->read(core::vec_id::read_access::position)->getValue();
 
     constexpr Real max_real = std::numeric_limits<Real>::max();
     constexpr Real min_real = std::numeric_limits<Real>::lowest();

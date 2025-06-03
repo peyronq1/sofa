@@ -230,7 +230,7 @@ void FixedProjectiveConstraint<DataTypes>::projectJacobianMatrix(const core::Mec
 
 // projectVelocity applies the same changes on velocity vector as projectResponse on position vector :
 // Each fixed point received a null velocity vector.
-// When a new fixed point is added while its velocity vector is already null, projectVelocity is not usefull.
+// When a new fixed point is added while its velocity vector is already null, projectVelocity is not useful.
 // But when a new fixed point is added while its velocity vector is not null, it's necessary to fix it to null or 
 // to set the projectVelocity option to True. If not, the fixed point is going to drift.
 template <class DataTypes>
@@ -242,7 +242,7 @@ void FixedProjectiveConstraint<DataTypes>::projectVelocity(const core::Mechanica
 
     helper::WriteAccessor<DataVecDeriv> res (vData );
 
-    if ( d_fixAll.getValue() )    // fix everyting
+    if ( d_fixAll.getValue() )    // fix everything
     {
         for(Size i=0; i<res.size(); i++)
             res[i] = Deriv();
@@ -372,7 +372,7 @@ void FixedProjectiveConstraint<DataTypes>::computeBBoxForIndices(const type::vec
 
     const auto drawSize = static_cast<Real>(d_drawSize.getValue());
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     for (const auto index : indices)
     {
@@ -426,7 +426,7 @@ void FixedProjectiveConstraint<DataTypes>::draw(const core::visual::VisualParams
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     const SetIndexArray & indices = d_indices.getValue();
 
     if( d_drawSize.getValue() == 0) // old classical drawing by points

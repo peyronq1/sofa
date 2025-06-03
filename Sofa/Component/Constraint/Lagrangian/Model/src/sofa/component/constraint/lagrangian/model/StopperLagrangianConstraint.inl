@@ -35,9 +35,6 @@ StopperLagrangianConstraint<DataTypes>::StopperLagrangianConstraint(MechanicalSt
     , d_min(initData(&d_min, -100.0_sreal, "min", "minimum value accepted"))
     , d_max(initData(&d_max, 100.0_sreal, "max", "maximum value accepted"))
 {
-        index.setOriginalData(&d_index);
-        min.setOriginalData(&d_min);
-        max.setOriginalData(&d_max);
 }
 
 template<class DataTypes>
@@ -46,7 +43,7 @@ void StopperLagrangianConstraint<DataTypes>::init()
     this->mstate = dynamic_cast<MechanicalState*>(this->getContext()->getMechanicalState());
     assert(this->mstate);
 
-    helper::WriteAccessor<Data<VecCoord> > xData = *this->mstate->write(core::VecCoordId::position());
+    helper::WriteAccessor<Data<VecCoord> > xData = *this->mstate->write(core::vec_id::write_access::position);
     VecCoord& x = xData.wref();
     if (x[d_index.getValue()].x() < d_min.getValue())
         x[d_index.getValue()].x() = (Real) d_min.getValue();

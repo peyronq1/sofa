@@ -45,6 +45,8 @@ using sofa::simulation::SceneLoaderXML ;
 
 #include <sofa/component/linearsolver/iterative/GraphScatteredTypes.h>
 
+#include <sofa/simpleapi/SimpleApi.h>
+
 #include <map>
 
 #include <sofa/helper/BackTrace.h>
@@ -114,8 +116,15 @@ struct PlaneForceField_test : public BaseSimulationTest
      * by the plane force field.
      * In the special case where : stiffness = 500, damping = 5 and maxForce = 0 (default values)
     */
-    void SetUp() override {}
-    void TearDown() override {}
+    void doSetUp() override
+    {
+        this->loadPlugins({
+            Sofa.Component.StateContainer,
+            Sofa.Component.MechanicalLoad
+        });
+    }
+
+    void doTearDown() override {}
 
     void setupDefaultScene()
     {
@@ -149,8 +158,8 @@ struct PlaneForceField_test : public BaseSimulationTest
         m_mechanicalObj->x.setValue(points);
 
         typename TypedUniformMass::SPtr uniformMass = New<TypedUniformMass>();
-        m_root->addObject(uniformMass);
         uniformMass->d_totalMass.setValue(1);
+        m_root->addObject(uniformMass);
 
         /*Create the plane force field*/
         m_planeForceFieldSPtr = New<PlaneForceFieldType>();
@@ -213,7 +222,7 @@ struct PlaneForceField_test : public BaseSimulationTest
         return true;
     }
 
-    /// This kind of test is important as it enforce the developper to take a wider range of
+    /// This kind of test is important as it enforce the developer to take a wider range of
     /// input values and check that they are gracefully handled.
     bool testMonkeyValuesForAttributes()
     {
@@ -332,7 +341,7 @@ struct PlaneForceField_test : public BaseSimulationTest
 
 };
 
-// Define the list of DataTypes to instanciate
+// Define the list of DataTypes to instantiate
 using ::testing::Types;
 typedef Types<
               TypeTuple<Rigid3Types, Rigid3Mass>
@@ -342,7 +351,7 @@ typedef Types<
               ,TypeTuple<Vec6Types, SReal>
 > DataTypes;
 
-// Test suite for all the instanciations
+// Test suite for all the instantiations
 TYPED_TEST_SUITE(PlaneForceField_test, DataTypes);// first test case
 TYPED_TEST( PlaneForceField_test , testPlaneForceField )
 {

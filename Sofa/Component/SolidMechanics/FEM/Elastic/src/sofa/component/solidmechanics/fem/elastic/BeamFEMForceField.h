@@ -25,8 +25,6 @@
 #include <sofa/component/solidmechanics/fem/elastic/BaseLinearElasticityFEMForceField.h>
 #include <sofa/core/topology/TopologyData.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::solidmechanics::fem::elastic
 {
 
@@ -131,10 +129,6 @@ public:
         }
     };
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<type::vector<BeamInfo>>  m_beamsData;
-
-
     EdgeData<type::vector<BeamInfo> > d_beamsData; ///< Internal element data
 
 protected:
@@ -172,7 +166,7 @@ public:
     virtual void reinitBeam(Index i);
     void addForce(const MechanicalParams* mparams, DataVecDeriv &  dataF, const DataVecCoord &  dataX , const DataVecDeriv & dataV ) override;
     void addDForce(const MechanicalParams* mparams, DataVecDeriv&   datadF , const DataVecDeriv&   datadX ) override;
-    void addKToMatrix(const MechanicalParams* mparams, const MultiMatrixAccessor* matrix ) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
     void buildStiffnessMatrix(core::behavior::StiffnessMatrix* matrix) override;
     void buildDampingMatrix(core::behavior::DampingMatrix* /*matrix*/) final;
     SReal getPotentialEnergy(const MechanicalParams* mparams, const DataVecCoord&  x) const override;

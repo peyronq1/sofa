@@ -34,36 +34,34 @@ typedef core::topology::BaseMeshTopology::Triangle	Triangle;
 namespace sofa::component::collision::geometry
 {
 
-int TriangleOctreeModelClass =	core::RegisterObject ("collision model using a triangular mesh mapped to an Octree").add <	TriangleOctreeModel > ().addAlias ("TriangleOctree");
+void registerTriangleOctreeModel(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Collision model using a triangular mesh mapped to an Octree.")
+        .add <	TriangleOctreeModel >());
+}
 
 TriangleOctreeModel::TriangleOctreeModel ()
 {
 }
 
-void TriangleOctreeModel::draw (const core::visual::VisualParams* vparams)
+void TriangleOctreeModel::drawCollisionModel (const core::visual::VisualParams* vparams)
 {
-    const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
+    TriangleCollisionModel<sofa::defaulttype::Vec3Types>::drawCollisionModel(vparams);
 
-    TriangleCollisionModel<sofa::defaulttype::Vec3Types>::draw(vparams);
-    if (isActive () && vparams->displayFlags().getShowCollisionModels ())
+    if (vparams->displayFlags().getShowWireFrame())
     {
-        if (vparams->displayFlags().getShowWireFrame ())
-            vparams->drawTool()->setPolygonMode(0, true);
-
-        vparams->drawTool()->enableLighting();
-        const float* getCol = getColor4f();
-        const auto color = sofa::type::RGBAColor(getCol[0], getCol[1], getCol[2], getCol[3]);
-        vparams->drawTool()->setMaterial(color);
-
-        if(octreeRoot)
-            octreeRoot->draw(vparams->drawTool());
-
-        vparams->drawTool()->disableLighting();
-        if (vparams->displayFlags().getShowWireFrame ())
-            vparams->drawTool()->setPolygonMode(0, false);
+        vparams->drawTool()->setPolygonMode(0, true);
     }
 
+    vparams->drawTool()->enableLighting();
+    const float* getCol = getColor4f();
+    const auto color = sofa::type::RGBAColor(getCol[0], getCol[1], getCol[2], getCol[3]);
+    vparams->drawTool()->setMaterial(color);
 
+    if (octreeRoot) octreeRoot->draw(vparams->drawTool());
+
+    vparams->drawTool()->disableLighting();
+    if (vparams->displayFlags().getShowWireFrame()) vparams->drawTool()->setPolygonMode(0, false);
 }
 
 void TriangleOctreeModel::computeBoundingTree(int maxDepth)
@@ -86,9 +84,9 @@ void TriangleOctreeModel::computeBoundingTree(int maxDepth)
         pNorms[i]=type::Vec3(0,0,0);
     }
     type::Vec3 minElem, maxElem;
-    maxElem[0]=minElem[0]=m_mstate->read(core::ConstVecCoordId::position())->getValue()[0][0];
-    maxElem[1]=minElem[1]=m_mstate->read(core::ConstVecCoordId::position())->getValue()[0][1];
-    maxElem[2]=minElem[2]=m_mstate->read(core::ConstVecCoordId::position())->getValue()[0][2];
+    maxElem[0]=minElem[0]=m_mstate->read(core::vec_id::read_access::position)->getValue()[0][0];
+    maxElem[1]=minElem[1]=m_mstate->read(core::vec_id::read_access::position)->getValue()[0][1];
+    maxElem[2]=minElem[2]=m_mstate->read(core::vec_id::read_access::position)->getValue()[0][2];
 
     cubeModel->resize(1);  // size = number of triangles
     for (std::size_t i=1; i<size; i++)

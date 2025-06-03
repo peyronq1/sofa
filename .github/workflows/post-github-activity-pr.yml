@@ -12,13 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository_owner == 'sofa-framework' }}
     env:
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_MAIN_WEBHOOK_URL }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_GITHUB_ACTIVITY_WEBHOOK_URL }}
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pip packages
         run: |
           pip install python-graphql-client
           pip install python-dateutil

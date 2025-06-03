@@ -38,15 +38,16 @@ using namespace sofa::core::collision;
 using namespace sofa::component::collision::geometry;
 using namespace helper;
 
-int NewProximityIntersectionClass = core::RegisterObject("Optimized Proximity Intersection based on Triangle-Triangle tests, ignoring Edge-Edge cases")
-        .add< NewProximityIntersection >()
-        ;
+void registerNewProximityIntersection(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Optimized Proximity Intersection based on Triangle-Triangle tests, ignoring Edge-Edge cases")
+        .add< NewProximityIntersection >());
+}
 
 NewProximityIntersection::NewProximityIntersection()
     : BaseProximityIntersection()
     , d_useLineLine(initData(&d_useLineLine, false, "useLineLine", "Line-line collision detection enabled"))
 {
-    useLineLine.setOriginalData(&d_useLineLine);
 }
 
 void NewProximityIntersection::init()

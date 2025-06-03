@@ -45,7 +45,7 @@ TriangleBendingSprings<DataTypes>::~TriangleBendingSprings()
 template<class DataTypes>
 void TriangleBendingSprings<DataTypes>::addSpring( unsigned a, unsigned b )
 {
-    const VecCoord& x =this->mstate1->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x =this->mstate1->read(core::vec_id::read_access::position)->getValue();
     Real s = (Real)this->d_ks.getValue()[0];
     Real d = (Real)this->d_kd.getValue()[0];
     Real l = (x[a]-x[b]).norm();
@@ -59,7 +59,7 @@ void TriangleBendingSprings<DataTypes>::registerTriangle( unsigned a, unsigned b
     {
         const IndexPair edge(a<b ? a : b,a<b ? b : a);
         const unsigned opposite = c;
-        if( edgeMap.find( edge ) == edgeMap.end() )
+        if(!edgeMap.contains( edge ))
         {
             edgeMap[edge] = opposite;
         }
@@ -73,7 +73,7 @@ void TriangleBendingSprings<DataTypes>::registerTriangle( unsigned a, unsigned b
     {
         const IndexPair edge(b<c ? b : c,b<c ? c : b);
         const unsigned opposite = a;
-        if( edgeMap.find( edge ) == edgeMap.end() )
+        if(!edgeMap.contains( edge ))
         {
             edgeMap[edge] = opposite;
         }
@@ -87,7 +87,7 @@ void TriangleBendingSprings<DataTypes>::registerTriangle( unsigned a, unsigned b
     {
         const IndexPair edge(c<a ? c : a,c<a ? a : c);
         const unsigned  opposite = b;
-        if( edgeMap.find( edge ) == edgeMap.end() )
+        if(!edgeMap.contains( edge ))
         {
             edgeMap[edge] = opposite;
         }

@@ -442,7 +442,7 @@ Index TopologicalChangeManager::removeItemsFromCollisionModel(sofa::core::Collis
 // Handle Cutting (activated only for a triangular topology), using global variables to register the two last input points
 bool TopologicalChangeManager::incisionCollisionModel(sofa::core::CollisionElementIterator elem, sofa::type::Vec3& pos, const bool firstInput, int snapingValue, int snapingBorderValue)
 {
-    const Triangle triangle(elem);
+    const sofa::component::collision::geometry::Triangle triangle(elem);
     TriangleCollisionModel<sofa::defaulttype::Vec3Types>* model = triangle.getCollisionModel();
 
     if (model != nullptr)
@@ -462,7 +462,7 @@ bool TopologicalChangeManager::incisionCollisionModel(sofa::core::CollisionEleme
         {
             const bool isCut = this->incisionTriangleModel (model, incision.indexTriangle, incision.coordPoint, model, elem.getIndex(), pos, snapingValue, snapingBorderValue);
 
-            if (isCut && !incision.firstCut) // cut has been reached, and will possible be continue. Stocking informations.
+            if (isCut && !incision.firstCut) // cut has been reached, and will possible be continue. Stocking information.
             {
                 incision.coordPoint[0] = pos[0];
                 incision.coordPoint[1] = pos[1];
@@ -510,8 +510,8 @@ bool TopologicalChangeManager::incisionTriangleModel(TriangleCollisionModel<sofa
     TriangleCollisionModel<sofa::defaulttype::Vec3Types>* firstCollisionModel = dynamic_cast< TriangleCollisionModel<sofa::defaulttype::Vec3Types>* >(firstModel);
     TriangleCollisionModel<sofa::defaulttype::Vec3Types>* secondCollisionModel = dynamic_cast< TriangleCollisionModel<sofa::defaulttype::Vec3Types>* >(secondModel);
 
-    Triangle firstTriangle(firstCollisionModel, idxA);
-    Triangle secondTriangle(secondCollisionModel, idxB);
+    sofa::component::collision::geometry::Triangle firstTriangle(firstCollisionModel, idxA);
+    sofa::component::collision::geometry::Triangle secondTriangle(secondCollisionModel, idxB);
 
     if (firstCollisionModel != secondCollisionModel)
     {
@@ -555,7 +555,7 @@ bool TopologicalChangeManager::incisionTriangleModel(TriangleCollisionModel<sofa
         if(!incision.firstCut) //Not the first cut, look for new coord of a
         {
             const core::behavior::MechanicalState<Vec3Types>* mstate = currentTopology->getContext()->get<core::behavior::MechanicalState<Vec3Types> >();
-            const auto &v_coords =  mstate->read(core::ConstVecCoordId::position())->getValue();
+            const auto &v_coords =  mstate->read(core::vec_id::read_access::position)->getValue();
             coord_a = v_coords[last_indexPoint];
         }
 
@@ -565,7 +565,7 @@ bool TopologicalChangeManager::incisionTriangleModel(TriangleCollisionModel<sofa
         sofa::type::vector<Index> indices_list;
         sofa::type::vector< Vec3 > coords2_list;
 
-        // Snaping value: input are percentages, we need to transform it as real epsilon value;
+        // Snapping value: input are percentages, we need to transform it as real epsilon value;
         const double epsilonSnap = (double)snapingValue/200;
         const double epsilonBorderSnap = (double)snapingBorderValue/210; // magic number (0.5 is max value and must not be reached, as threshold is compared to barycoord value)
 

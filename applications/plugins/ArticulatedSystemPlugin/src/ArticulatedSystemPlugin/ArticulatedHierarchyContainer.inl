@@ -28,7 +28,7 @@
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/simulation/Node.h>
 
-namespace sofa::component::container
+namespace articulatedsystemplugin
 {
 
 Articulation::Articulation():
@@ -249,7 +249,7 @@ void ArticulatedHierarchyContainer::init ()
             }
 
             // for Arboris Mapping, init the transformation for each articulation center
-            type::Quat<SReal> q; // TODO: add a rotation component to the positionning on the ArticulatedHierarchyContainer
+            type::Quat<SReal> q; // TODO: add a rotation component to the positioning on the ArticulatedHierarchyContainer
             (*ac)->H_p_pLc.set((*ac)->posOnParent.getValue(),q);
             (*ac)->H_c_cLp.set((*ac)->posOnChild.getValue(), q);
             (*ac)->H_pLc_cLp.identity();
@@ -258,4 +258,5 @@ void ArticulatedHierarchyContainer::init ()
 }
 
 
-} // namespace sofa::component::container
+} // namespace articulatedsystemplugin
+

@@ -168,6 +168,7 @@ protected:
 
     virtual void updateFromTopology();
     virtual void updateNormals();
+    void drawCollisionModel(const core::visual::VisualParams* vparams) override;
 
 public:
     void init() override;
@@ -182,14 +183,12 @@ public:
 
     void draw(const core::visual::VisualParams*, sofa::Index index) override;
 
-    void draw(const core::visual::VisualParams* vparams) override;
-
     bool canCollideWithElement(sofa::Index index, CollisionModel* model2, sofa::Index index2) override;
 
     core::behavior::MechanicalState<DataTypes>* getMechanicalState() { return m_mstate; }
     const core::behavior::MechanicalState<DataTypes>* getMechanicalState() const { return m_mstate; }
 
-    const VecCoord& getX() const { return(getMechanicalState()->read(core::ConstVecCoordId::position())->getValue()); }
+    const VecCoord& getX() const { return(getMechanicalState()->read(core::vec_id::read_access::position)->getValue()); }
     const sofa::core::topology::BaseMeshTopology::SeqTriangles& getTriangles() const { return *m_triangles; }
     const VecDeriv& getNormals() const { return m_normals; }
     int getTriangleFlags(sofa::core::topology::BaseMeshTopology::TriangleID i);

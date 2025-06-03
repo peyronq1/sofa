@@ -215,7 +215,7 @@ struct DataTrackerEngine_test: public BaseTest
 
     static unsigned updateCounter;
     core::DataTrackerCallback dataTracker;
-    void SetUp() override
+    void doSetUp() override
     {
         updateCounter = 0;
     }
@@ -372,7 +372,7 @@ struct DataTrackerFunctor_test: public BaseTest
         // modifying the Data even with the same value is calling the functor
         // note it would be possible to do your own functor,
         // that keep a hash of the previous value
-        // if you really need to check when the data trully changed
+        // if you really need to check when the data truly changed
         testObject.myData.setValue( false );
         ASSERT_EQ( 3u, myDataFunctor.m_counter );
 

@@ -176,6 +176,8 @@ TEST(MappingGraph, diamondMapping)
     sofa::simulation::Node::SPtr root = simulation->createNewGraph("root");
     EXPECT_EQ(root->getName(), "root");
 
+    const auto plugins = sofa::testing::makeScopedPlugin({Sofa.Component.Mapping.Linear});
+
     const auto top = sofa::core::objectmodel::New<sofa::component::statecontainer::MechanicalObject<sofa::defaulttype::Vec3Types> >();
     root->addObject(top);
     top->setName("top");

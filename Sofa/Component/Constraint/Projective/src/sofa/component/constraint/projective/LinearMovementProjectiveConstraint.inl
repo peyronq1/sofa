@@ -54,11 +54,6 @@ LinearMovementProjectiveConstraint<DataTypes>::LinearMovementProjectiveConstrain
     d_keyTimes.endEdit();
     d_keyMovements.beginEdit()->push_back(Deriv() );
     d_keyMovements.endEdit();
-
-    m_indices.setOriginalData(&d_indices);
-    m_keyTimes.setOriginalData(&d_keyTimes);
-    m_keyMovements.setOriginalData(&d_keyMovements);
-    showMovement.setOriginalData(&d_showMovement);
 }
 
 
@@ -461,7 +456,7 @@ void LinearMovementProjectiveConstraint<DataTypes>::draw(const core::visual::Vis
     }
     else
     {
-        const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+        const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
         sofa::type::vector<type::Vec3> points;
         type::Vec3 point;

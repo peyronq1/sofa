@@ -36,7 +36,7 @@
 namespace sofa::component::constraint::projective
 {
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template <class DataTypes>
 class FixedProjectiveConstraintInternalData
 {
@@ -70,7 +70,6 @@ public:
     typedef sofa::core::topology::TopologySubsetIndices SetIndex;
     typedef sofa::core::topology::Point Point;
 
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vec3, sofa::type::Vec3);
 protected:
     FixedProjectiveConstraint();
 

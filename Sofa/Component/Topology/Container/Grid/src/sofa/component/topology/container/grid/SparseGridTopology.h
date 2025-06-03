@@ -32,8 +32,6 @@
 #include <stack>
 #include <string>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::core::loader
 {
     class VoxelLoader;
@@ -46,20 +44,15 @@ class RegularGridTopology;
 
 /** A sparse grid topology. Like a sparse FFD building from the bounding box of the object. Starting from a RegularGrid, only valid cells containing matter (ie intersecting the original surface mesh or totally inside the object) are considered.
  * Valid cells are tagged by a Type BOUNDARY or INSIDE
- * WARNING: the corresponding node in the XML file has to be placed BEFORE the MechanicalObject node, in order to excute its init() before the MechanicalObject one in order to be able to give dofs
+ * WARNING: the corresponding node in the XML file has to be placed BEFORE the MechanicalObject node, in order to execute its init() before the MechanicalObject one in order to be able to give dofs
  */
 class SOFA_COMPONENT_TOPOLOGY_CONTAINER_GRID_API SparseGridTopology : public container::constant::MeshTopology
 {
 public:
     SOFA_CLASS(SparseGridTopology,MeshTopology);
-
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vec3i, sofa::type::Vec3i);
     typedef sofa::type::fixed_array<type::Vec3,8> CubeCorners;
-
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(BoundingBox, sofa::type::BoundingBox);
-
     typedef enum {OUTSIDE,INSIDE,BOUNDARY} Type; ///< each cube has a type depending on its filling ratio
+
 protected:
     SparseGridTopology(bool _isVirtual=false);
 
@@ -74,7 +67,7 @@ public:
     /// building from a mesh file
     virtual void buildAsFinest();
 
-    /// building by condensating a finer sparse grid (used if setFinerSparseGrid has initializated _finerSparseGrid before calling init() )
+    /// building by condensating a finer sparse grid (used if setFinerSparseGrid has initialized _finerSparseGrid before calling init() )
     virtual void buildFromFiner();
 
     /// building eventual virtual finer levels (cf d_nbVirtualFinerLevels)
@@ -82,7 +75,7 @@ public:
 
     typedef std::map<type::Vec3, Index> MapBetweenCornerPositionAndIndice;///< a vertex indice for a given vertex position in space
 
-    /// connexion between several coarsened levels
+    /// connection between several coarsened levels
     typedef std::vector<type::fixed_array<Index,8> > HierarchicalCubeMap; ///< a cube indice -> corresponding 8 child indices on the potential _finerSparseGrid
     HierarchicalCubeMap _hierarchicalCubeMap;
     typedef type::vector<Index> InverseHierarchicalCubeMap; ///< a fine cube indice -> corresponding coarser cube indice
@@ -191,69 +184,23 @@ public:
     {
         return d_dataVoxels.getValue()[index] == 1;
     }
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<bool> _fillWeighted;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<bool> bOnlyInsideCells;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData< type::vector< unsigned char > >     dataVoxels;
-
 
     Data< type::vector< unsigned char > >     d_dataVoxels;
-
     Data<bool> d_fillWeighted; ///< Is quantity of matter inside a cell taken into account? (.5 for boundary, 1 for inside)
-
     Data<bool> d_bOnlyInsideCells; ///< Select only inside cells (exclude boundary cells)
 
-
 protected:
-
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData< sofa::type::Vec< 3, int > >  n;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::Vec3> _min;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::Vec3> _max;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<SReal> _cellWidth;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<int> _nbVirtualFinerLevels;
-
-
     bool isVirtual;
     /// cutting number in all directions
     Data< sofa::type::Vec< 3, int > > d_n;
     Data< type::Vec3 > d_min; ///< Min
     Data< type::Vec3 > d_max; ///< Max
     Data< SReal > d_cellWidth; ///< if > 0 : dimension of each cell in the created grid
-    Data< int > d_nbVirtualFinerLevels; ///< create virtual (not in the animation tree) finer sparse grids in order to dispose of finest information (usefull to compute better mechanical properties for example)
+    Data< int > d_nbVirtualFinerLevels; ///< create virtual (not in the animation tree) finer sparse grids in order to dispose of finest information (useful to compute better mechanical properties for example)
 
 public:
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::Vec3i> dataResolution;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::Vec3> voxelSize;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<unsigned int> marchingCubeStep;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<unsigned int> convolutionSize;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData< type::vector< type::vector<Index> > > facets;
-
-    Data< type::Vec3i >			d_dataResolution; ///< Dimension of the voxel File
-    Data< type::Vec3 >         d_voxelSize; ///< Dimension of one voxel
+    Data< type::Vec3i >		d_dataResolution; ///< Dimension of the voxel File
+    Data< type::Vec3 >      d_voxelSize; ///< Dimension of one voxel
     Data< unsigned int >    d_marchingCubeStep; ///< Step of the Marching Cube algorithm
     Data< unsigned int >    d_convolutionSize; ///< Dimension of the convolution kernel to smooth the voxels. 0 if no smoothing is required.
 

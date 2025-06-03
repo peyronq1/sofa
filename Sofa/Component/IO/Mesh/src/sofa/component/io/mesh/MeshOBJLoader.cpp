@@ -35,9 +35,11 @@ using namespace sofa::defaulttype;
 using namespace sofa::core::loader;
 using sofa::helper::getWriteOnlyAccessor;
 
-int MeshOBJLoaderClass = core::RegisterObject("Specific mesh loader for OBJ file format.")
-.add< MeshOBJLoader >()
-.addAlias("MeshObjLoader");
+void registerMeshOBJLoader(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Specific mesh loader for OBJ file format.")
+        .add< MeshOBJLoader >());
+}
 
 MeshOBJLoader::MeshOBJLoader()
     : MeshLoader()
@@ -495,7 +497,7 @@ bool MeshOBJLoader::readOBJ (std::ifstream &file, const char* filename)
                 if (vsplit)
                 {
                     vertPosIdx[j] = i;
-                    if (normMap.count(n))
+                    if (normMap.contains(n))
                         vertNormIdx[j] = normMap[n];
                     else
                     {

@@ -296,7 +296,7 @@ public:
  *  \brief Helper class used to register a class in the ObjectFactory.
  *
  *  This class accumulate information about a given class, as well as creators
- *  for each supported template instanciation, to register a new entry in
+ *  for each supported template instantiation, to register a new entry in
  *  the ObjectFactory.
  *
  *  It should be used as a temporary object, finalized when used to initialize
@@ -341,7 +341,7 @@ public:
     ObjectRegistrationData& addCreator(std::string classname, std::string templatename,
                                ObjectFactory::Creator::SPtr creator);
 
-    /// Add a template instanciation of this class.
+    /// Add a template instantiation of this class.
     ///
     /// \param defaultTemplate    set to true if this should be the default instance when no template name is given.
     template<class RealObject>
@@ -377,12 +377,14 @@ public:
 
     /// This is the final operation that will actually commit the additions to the ObjectFactory.
     bool commitTo(sofa::core::ObjectFactory* objectFactory) const;
+    
+    friend class RegisterObject;
 };
 
 
 // Legacy structure, to keep compatibility with olden code
 // using the singleton to get the instance of ObjectFactory
-class /* SOFA_ATTRIBUTE_DEPRECATED__REGISTEROBJECT() */ SOFA_CORE_API RegisterObject
+class SOFA_ATTRIBUTE_DEPRECATED__REGISTEROBJECT() SOFA_CORE_API RegisterObject
 {
 private:
     ObjectRegistrationData m_objectRegistrationdata;

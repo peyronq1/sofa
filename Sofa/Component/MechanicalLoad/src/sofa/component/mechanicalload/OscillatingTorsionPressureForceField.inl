@@ -46,17 +46,6 @@ OscillatingTorsionPressureForceField<DataTypes>::OscillatingTorsionPressureForce
     , d_showForces(initData(&d_showForces, (bool)false, "showForces", "draw triangles which have a given pressure"))
     , rotationAngle(0)
 {
-    trianglePressureMap.setOriginalData(&d_trianglePressureMap);
-    moment.setOriginalData(&d_moment);
-    triangleList.setOriginalData(&d_triangleList);
-    axis.setOriginalData(&d_axis);
-    center.setOriginalData(&d_center);
-    penalty.setOriginalData(&d_penalty);
-    frequency.setOriginalData(&d_frequency);
-    dmin.setOriginalData(&d_dmin);
-    dmax.setOriginalData(&d_dmax);
-    p_showForces.setOriginalData(&d_showForces);
-
 }
 
 template <class DataTypes>
@@ -227,7 +216,7 @@ void OscillatingTorsionPressureForceField<DataTypes>::buildDampingMatrix(core::b
 template<class DataTypes>
 void OscillatingTorsionPressureForceField<DataTypes>::initTriangleInformation()
 {
-    const VecCoord& x0 = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x0 = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
     int idx[3];
     Real d[10];
 
@@ -279,7 +268,7 @@ void OscillatingTorsionPressureForceField<DataTypes>::initTriangleInformation()
 template <class DataTypes>
 void OscillatingTorsionPressureForceField<DataTypes>::selectTrianglesAlongPlane()
 {
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::restPosition)->getValue();
     std::vector<bool> vArray;
 
     vArray.resize(x.size());
@@ -342,7 +331,7 @@ void OscillatingTorsionPressureForceField<DataTypes>::draw(const core::visual::V
     if (vparams->displayFlags().getShowWireFrame())
         vparams->drawTool()->setPolygonMode(0, true);
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     vparams->drawTool()->disableLighting();
     const sofa::type::RGBAColor color = sofa::type::RGBAColor::green();

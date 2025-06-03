@@ -6,7 +6,7 @@
         <RequiredPlugin name="Sofa.Component.Engine.Transform"/> <!-- Needed to use components [TransformEngine] -->
         <RequiredPlugin name="Sofa.Component.IO.Mesh"/> <!-- Needed to use components [StringMeshCreator] -->
         <RequiredPlugin name="Sofa.Component.LinearSolver.Iterative"/> <!-- Needed to use components [CGLinearSolver] -->
-        <RequiredPlugin name="Sofa.Component.Mapping.NonLinear"/> <!-- Needed to use components [DistanceMapping] -->
+        <RequiredPlugin name="Sofa.Component.Mapping.NonLinear"/> <!-- Needed to use components [DistanceMapping DistanceMultiMapping] -->
         <RequiredPlugin name="Sofa.Component.Mass"/> <!-- Needed to use components [DiagonalMass] -->
         <RequiredPlugin name="Sofa.Component.MechanicalLoad"/> <!-- Needed to use components [UniformVelocityDampingForceField] -->
         <RequiredPlugin name="Sofa.Component.ODESolver.Backward"/> <!-- Needed to use components [EulerImplicitSolver] -->
@@ -59,8 +59,8 @@
 
     <Node name="connection">
         <MechanicalObject template="Vec1" name="connectionDOF" />
-        <EdgeSetTopologyContainer edges="0 1"/>
-        <DistanceMultiMapping template="Vec3,Vec1" input="@../springs0 @../springs1" output="@connectionDOF" indexPairs="0 19 1 0" restLengths="1" geometricStiffness="0" applyRestPosition="true" computeDistance="true"/>
+        <EdgeSetTopologyContainer name="edgeTopo" edges="0 1"/>
+        <DistanceMultiMapping template="Vec3,Vec1" topology="@edgeTopo" input="@../springs0 @../springs1" output="@connectionDOF" indexPairs="0 19 1 0" restLengths="1" geometricStiffness="0" applyRestPosition="true" computeDistance="true"/>
         <RestShapeSpringsForceField template="Vec1" stiffness="1"/>
     </Node>
 

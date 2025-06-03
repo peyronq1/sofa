@@ -40,14 +40,6 @@ SubsetMapping<TIn, TOut>::SubsetMapping()
     , matrixJ()
     , updateJ(false)
 {
-    f_indices.setOriginalData(&d_indices);
-    f_first.setOriginalData(&d_first);
-    f_last.setOriginalData(&d_last);
-    f_radius.setOriginalData(&d_radius);
-    f_handleTopologyChange.setOriginalData(&d_handleTopologyChange);
-    f_ignoreNotFound.setOriginalData(&d_ignoreNotFound);
-    f_resizeToModel.setOriginalData(&d_resizeToModel);
-
 }
 
 template <class TIn, class TOut>
@@ -98,9 +90,9 @@ void SubsetMapping<TIn, TOut>::init()
     else if (d_indices.getValue().empty())
     {
 
-        // We have to construct the correspondance index
-        const InVecCoord& in   =this->fromModel->read(core::ConstVecCoordId::position())->getValue();
-        const OutVecCoord& out =this->toModel->read(core::ConstVecCoordId::position())->getValue();
+        // We have to construct the correspondence index
+        const InVecCoord& in   =this->fromModel->read(core::vec_id::read_access::position)->getValue();
+        const OutVecCoord& out =this->toModel->read(core::vec_id::read_access::position)->getValue();
         IndexArray& indices = *d_indices.beginEdit();
 
         indices.resize(out.size());
@@ -200,7 +192,7 @@ void SubsetMapping<TIn, TOut>::apply ( const core::MechanicalParams* /*mparams*/
     }
     
     const InVecCoord& in = dIn.getValue();
-    const OutVecCoord& out0 = this->toModel->read(core::ConstVecCoordId::restPosition())->getValue();
+    const OutVecCoord& out0 = this->toModel->read(core::vec_id::read_access::restPosition)->getValue();
     OutVecCoord& out = *dOut.beginEdit();
     const auto fromSize = in.size();
 
@@ -298,8 +290,8 @@ const sofa::linearalgebra::BaseMatrix* SubsetMapping<TIn, TOut>::getJ()
 {
     if (matrixJ.get() == 0 || updateJ)
     {
-        const OutVecCoord& out =this->toModel->read(core::ConstVecCoordId::position())->getValue();
-        const InVecCoord& in =this->fromModel->read(core::ConstVecCoordId::position())->getValue();
+        const OutVecCoord& out =this->toModel->read(core::vec_id::read_access::position)->getValue();
+        const InVecCoord& in =this->fromModel->read(core::vec_id::read_access::position)->getValue();
         const IndexArray& indices = d_indices.getValue();
         assert(indices.size() == out.size());
         const std::size_t fromSize = in.size();

@@ -38,8 +38,16 @@ namespace sofa::component::constraint::lagrangian::solver
 class SOFA_COMPONENT_CONSTRAINT_LAGRANGIAN_SOLVER_API ConstraintProblem
 {
 public:
+    // The compliance matrix projected in the constraint space
+    // If J is the jacobian matrix of the constraints and A is the mechanical matrix of the system,
+    // then W = J A^{-1} J^T
     sofa::linearalgebra::LPtrFullMatrix<SReal> W;
-    sofa::linearalgebra::FullVector<SReal> dFree, f;
+
+    // The constraint values of the "free motion" state
+    sofa::linearalgebra::FullVector<SReal> dFree;
+
+    // The lambda values from the Lagrange multipliers
+    sofa::linearalgebra::FullVector<SReal> f;
 
     ConstraintProblem();
     virtual ~ConstraintProblem();
@@ -48,10 +56,13 @@ public:
     int maxIterations;
 
     virtual void clear(int nbConstraints);
-    int getDimension()	{ return dimension; }
-    SReal** getW()		{ return W.lptr(); }
-    SReal* getDfree()	{ return dFree.ptr(); }
-    SReal* getF()		{ return f.ptr(); }
+
+    // Returns the number of scalar constraints, or equivalently the number of Lagrange multipliers
+    int getDimension() const { return dimension; }
+
+    SReal** getW() { return W.lptr(); }
+    SReal* getDfree() { return dFree.ptr(); }
+    SReal* getF() { return f.ptr(); }
 
     virtual void solveTimed(SReal tolerance, int maxIt, SReal timeout) = 0;
 
@@ -77,7 +88,7 @@ public:
     virtual ConstraintProblem* getConstraintProblem() = 0;
 
     /// Do not use the following LCPs until the next call to this function.
-    /// This is used to prevent concurent access to the LCP when using a LCPForceFeedback through an haptic thread.
+    /// This is used to prevent concurrent access to the LCP when using a LCPForceFeedback through an haptic thread.
     virtual void lockConstraintProblem(sofa::core::objectmodel::BaseObject* from, ConstraintProblem* p1, ConstraintProblem* p2=nullptr) = 0;
 
     void removeConstraintCorrection(core::behavior::BaseConstraintCorrection *s) override;

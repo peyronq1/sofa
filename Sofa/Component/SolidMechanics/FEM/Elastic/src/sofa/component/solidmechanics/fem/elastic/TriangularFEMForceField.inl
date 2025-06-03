@@ -48,7 +48,7 @@ TriangularFEMForceField<DataTypes>::TriangularFEMForceField()
     , d_method(initData(&d_method, std::string("large"), "method", "large: large displacements, small: small displacements"))
     , d_rotatedInitialElements(initData(&d_rotatedInitialElements, "rotatedInitialElements", "Flag activating rendering of stress directions within each triangle"))
     , d_initialTransformation(initData(&d_initialTransformation, "initialTransformation", "Flag activating rendering of stress directions within each triangle"))
-    , d_hosfordExponant(initData(&d_hosfordExponant, (Real)1.0, "hosfordExponant", "Exponant in the Hosford yield criteria"))
+    , d_hosfordExponant(initData(&d_hosfordExponant, (Real)1.0, "hosfordExponant", "Exponent in the Hosford yield criteria"))
     , d_criteriaValue(initData(&d_criteriaValue, (Real)1e15, "criteriaValue", "Fracturable threshold used to draw fracturable triangles"))
     , d_showStressValue(initData(&d_showStressValue, true, "showStressValue", "Flag activating rendering of stress values as a color in each triangle"))
     , d_showStressVector(initData(&d_showStressVector, false, "showStressVector", "Flag activating rendering of stress directions within each triangle"))
@@ -63,27 +63,14 @@ TriangularFEMForceField<DataTypes>::TriangularFEMForceField()
     , p_computeDrawInfo(false)
 {
     _anisotropicMaterial = false;
+    p_drawColorMap = new helper::ColorMap(256, "Blue to Red");
+
 #ifdef PLOT_CURVE
     f_graphStress.setWidget("graph");
     f_graphCriteria.setWidget("graph");
     f_graphOrientation.setWidget("graph");
 #endif
-
-    p_drawColorMap = new helper::ColorMap(256, "Blue to Red");
-
-    triangleInfo.setOriginalData(&d_triangleInfo);
-    vertexInfo.setOriginalData(&d_vertexInfo);
-    f_method.setOriginalData(&d_method);
-    m_rotatedInitialElements.setOriginalData(&d_rotatedInitialElements);
-    m_initialTransformation.setOriginalData(&d_initialTransformation);
-    hosfordExponant.setOriginalData(&d_hosfordExponant);
-    criteriaValue.setOriginalData(&d_criteriaValue);
-    showStressValue.setOriginalData(&d_showStressValue);
-    showStressVector.setOriginalData(&d_showStressVector);
-    showFracturableTriangles.setOriginalData(&d_showFracturableTriangles);
-    f_computePrincipalStress.setOriginalData(&d_computePrincipalStress);
-
-    }
+}
 
 
 template <class DataTypes>
@@ -161,7 +148,7 @@ void TriangularFEMForceField<DataTypes>::initSmall(int i, Index& a, Index& b, In
         tinfo->rotatedInitialElements = d_rotatedInitialElements.getValue()[i];
     else
     {
-        const  VecCoord& initialPoints = (this->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
+        const  VecCoord& initialPoints = (this->mstate->read(core::vec_id::read_access::restPosition)->getValue());
         const Coord& pA = initialPoints[a];
         const Coord& pB = initialPoints[b];
         const Coord& pC = initialPoints[c];
@@ -211,7 +198,7 @@ void TriangularFEMForceField<DataTypes>::initLarge(int i, Index& a, Index& b, In
     }
     else
     {
-        const VecCoord& initialPoints = (this->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
+        const VecCoord& initialPoints = (this->mstate->read(core::vec_id::read_access::restPosition)->getValue());
         tinfo->rotation = tinfo->initialTransformation;
         if (a >= (initialPoints).size() || b >= (initialPoints).size() || c >= (initialPoints).size())
         {
@@ -757,7 +744,7 @@ void TriangularFEMForceField<DataTypes>::computeStress(type::Vec<3, Real>& stres
     StrainDisplacement J;
     type::Vec<3, Real> strain;
     Transformation R_0_2, R_2_0;
-    const VecCoord& p = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& p = this->mstate->read(core::vec_id::read_access::position)->getValue();
     const Triangle& tri = this->l_topology->getTriangle(elementIndex);
     const auto& [a, b, c] = tri.array();
 
@@ -791,7 +778,7 @@ void TriangularFEMForceField<DataTypes>::computeStress(type::Vec<3, Real>& stres
         // then compute displacement in this frame
         m_triangleUtils.computeDisplacementLarge(D, R_0_2, triangleInf[elementIndex].rotatedInitialElements, p[a], p[b], p[c]);
 
-        // and compute postions of a, b, c in the co-rotational frame
+        // and compute positions of a, b, c in the co-rotational frame
         Coord A = Coord(0, 0, 0); SOFA_UNUSED(A);
         Coord B = R_0_2 * (p[b] - p[a]);
         Coord C = R_0_2 * (p[c] - p[a]);
@@ -879,7 +866,7 @@ void TriangularFEMForceField<DataTypes>::computeStressAcrossDirection(Real& stre
 {
     const Triangle& tri = this->l_topology->getTriangle(elementIndex);
     const auto& [a, b, c] = tri.array();
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     Coord n = cross(x[b] - x[a], x[c] - x[a]);
     Coord dir_t = cross(dir, n);
     this->computeStressAlongDirection(stress_across_dir, elementIndex, dir_t, stress);
@@ -890,7 +877,7 @@ void TriangularFEMForceField<DataTypes>::computeStressAcrossDirection(Real& stre
 {
     const Triangle& tri = this->l_topology->getTriangle(elementIndex);
     const auto& [a, b, c] = tri.array();
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     Coord n = cross(x[b] - x[a], x[c] - x[a]);
     Coord dir_t = cross(dir, n);
     this->computeStressAlongDirection(stress_across_dir, elementIndex, dir_t);
@@ -1242,7 +1229,7 @@ void TriangularFEMForceField<DataTypes>::draw(const core::visual::VisualParams* 
 
     vparams->drawTool()->disableLighting();
 
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     const type::vector<TriangleInformation>& triangleInf = d_triangleInfo.getValue();
     const auto& triangles = this->l_topology->getTriangles();
     const Size nbTriangles = triangles.size();

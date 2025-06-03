@@ -26,14 +26,12 @@
 
 #include <string>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::topology::container::grid
 {
 
 /**
 Build a SparseGridTopology for several given Triangular meshes.
-A stiffness coefficient has to be assigned for each mesh. The last found stiffness coefficient is used for an element shared by several meshes => The mesh ordering is important, and so, more specific stiffness informations must appear in last.
+A stiffness coefficient has to be assigned for each mesh. The last found stiffness coefficient is used for an element shared by several meshes => The mesh ordering is important, and so, more specific stiffness information must appear in last.
 */
 class SOFA_COMPONENT_TOPOLOGY_CONTAINER_GRID_API SparseGridMultipleTopology : public SparseGridRamificationTopology
 {
@@ -80,31 +78,11 @@ public:
 
 
 protected :
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::vector<std::string>> _fileTopologies;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::vector<float>> _dataStiffnessCoefs;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<type::vector<float>> _dataMassCoefs;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<bool> _computeRamifications;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_TOPOLOGY_CONTAINER_GRID()
-    sofa::core::objectmodel::RenamedData<bool> _erasePreviousCoef;
-
-
     Data< type::vector< std::string > > d_fileTopologies; ///< All topology filenames
     Data< type::vector< float > > d_dataStiffnessCoefs; ///< A stiffness coefficient for each topology filename
     Data< type::vector< float > > d_dataMassCoefs; ///< A mass coefficient for each topology filename
     Data<bool> d_computeRamifications; ///< Are ramifications wanted?
     Data<bool> d_erasePreviousCoef; ///< Does a new stiffness/mass coefficient replace the previous or blend half/half with it?
-
-
-
 
     void buildFromTriangleMesh(helper::io::Mesh*, unsigned fileIdx);
     type::vector< RegularGridTopology::SPtr > _regularGrids;

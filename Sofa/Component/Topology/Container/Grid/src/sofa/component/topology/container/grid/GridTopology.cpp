@@ -27,11 +27,11 @@
 namespace sofa::component::topology::container::grid
 {
 
-int GridTopologyClass = core::RegisterObject("Base class fo a regular grid in 3D")
-        .addAlias("Grid")
-        .add< GridTopology >()
-        ;
-
+void registerGridTopology(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Base class fo a regular grid in 3D.")
+        .add< GridTopology >());
+}
 
 GridTopology::GridUpdate::GridUpdate(GridTopology *t):
     m_topology(t)
@@ -123,7 +123,7 @@ void GridTopology::GridUpdate::updateEdges()
                 // sort vertices in lexicographic order
                 const Edge e = ((v1<v2) ? Edge(v1, v2) : Edge(v2, v1));
 
-                if (edgeMap.find(e) == edgeMap.end())
+                if (!edgeMap.contains(e))
                 {
                     // edge not in edgeMap so create a new one
                     const size_t edgeIndex = edgeMap.size();

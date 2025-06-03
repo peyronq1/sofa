@@ -45,10 +45,11 @@ using namespace sofa::defaulttype;
 using namespace sofa::component::collision::geometry;
 using core::topology::BaseMeshTopology;
 
-
-int LocalMinDistanceClass = core::RegisterObject("A set of methods to compute (for constraint methods) if two primitives are close enough to consider they collide")
-        .add< LocalMinDistance >()
-        ;
+void registerLocalMinDistance(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("A set of methods to compute (for constraint methods) if two primitives are close enough to consider they collide")
+        .add< LocalMinDistance >());
+}
 
 LocalMinDistance::LocalMinDistance()
     : BaseProximityIntersection()
@@ -57,10 +58,6 @@ LocalMinDistance::LocalMinDistance()
     , d_coneFactor(initData(&d_coneFactor, 0.5, "coneFactor", "Factor for filtering cone angle computation"))
     , d_useLMDFilters(initData(&d_useLMDFilters, false, "useLMDFilters", "Use external cone computation"))
 {
-    filterIntersection.setOriginalData(&d_filterIntersection);
-    angleCone.setOriginalData(&d_angleCone);
-    coneFactor.setOriginalData(&d_coneFactor);
-    useLMDFilters.setOriginalData(&d_useLMDFilters);
 }
 
 void LocalMinDistance::init()
@@ -1203,7 +1200,7 @@ bool LocalMinDistance::testValidity(Point &p, const Vec3 &PQ) const
         return true;
 
     BaseMeshTopology* topology = p.getCollisionModel()->getCollisionTopology();
-    const auto& x =(p.getCollisionModel()->getMechanicalState()->read(core::ConstVecCoordId::position())->getValue());
+    const auto& x =(p.getCollisionModel()->getMechanicalState()->read(core::vec_id::read_access::position)->getValue());
 
     const auto& trianglesAroundVertex = topology->getTrianglesAroundVertex(p.getIndex());
     const auto& edgesAroundVertex = topology->getEdgesAroundVertex(p.getIndex());
@@ -1277,7 +1274,7 @@ bool LocalMinDistance::testValidity(Line &l, const Vec3 &PQ) const
     AB.normalize();
 
     BaseMeshTopology* topology = l.getCollisionModel()->getCollisionTopology();
-    const auto& x =(l.getCollisionModel()->getMechanicalState()->read(core::ConstVecCoordId::position())->getValue());
+    const auto& x =(l.getCollisionModel()->getMechanicalState()->read(core::vec_id::read_access::position)->getValue());
     const auto& trianglesAroundEdge = topology->getTrianglesAroundEdge(l.getIndex());
 
     if ( trianglesAroundEdge.size() == 2)

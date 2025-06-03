@@ -39,9 +39,11 @@ using namespace sofa::core::collision;
 using namespace sofa::component::collision::geometry;
 using namespace helper;
 
-int MinProximityIntersectionClass = core::RegisterObject("A set of methods to compute if two primitives are close enough to consider they collide")
-        .add< MinProximityIntersection >()
-        ;
+void registerMinProximityIntersection(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("A set of methods to compute if two primitives are close enough to consider they collide.")
+        .add< MinProximityIntersection >());
+}
 
 MinProximityIntersection::MinProximityIntersection()
     : BaseProximityIntersection()
@@ -51,11 +53,6 @@ MinProximityIntersection::MinProximityIntersection()
     , d_useLinePoint(initData(&d_useLinePoint, true, "useLinePoint", "activate Line-Point intersection tests"))
     , d_useLineLine(initData(&d_useLineLine, true, "useLineLine", "activate Line-Line  intersection tests"))
 {
-    useSphereTriangle.setOriginalData(&d_useSphereTriangle);
-    usePointPoint.setOriginalData(&d_usePointPoint);
-    useLinePoint.setOriginalData(&d_useLinePoint);
-    useLineLine.setOriginalData(&d_useLineLine);
-    useSurfaceNormals.setOriginalData(&d_useSurfaceNormals);
 }
 
 void MinProximityIntersection::init()

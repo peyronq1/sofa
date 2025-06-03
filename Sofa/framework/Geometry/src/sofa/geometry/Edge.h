@@ -274,7 +274,7 @@ struct Edge
             // [ (pA - pC) + alpha(pB - pA) - beta(pD - pC) ].dot(pD - pC) = 0
             const auto CA = pA - pC;
 
-            // Writting d[CA/AB] == (pA - pC).dot(pB - pA) and subtituting beta we obtain:
+            // Writing d[CA/AB] == (pA - pC).dot(pB - pA) and substituting beta we obtain:
             // beta = (d[CA/CD] + alpha * d[AB/CD]) / d[CD/CD]
             // alpha = ( d[CA/CD]*d[CD/AB] - d[CA/AB]*d[CD/CD] ) / ( d[AB/AB]*d[CD/CD] - d[AB/CD]*d[AB/CD])
             const T dCACD = sofa::type::dot(CA, CD);
@@ -292,8 +292,18 @@ struct Edge
                 return false;
             }
 
-            const T alpha = alphaNom / alphaDenom;
-            const T beta = (dCACD + alpha * dABCD) / dCDCD;
+            T alpha = alphaNom / alphaDenom;
+            T beta = (dCACD + alpha * dABCD) / dCDCD;
+
+            if (fabs(alpha) < EQUALITY_THRESHOLD)
+                alpha = 0;
+            else if (fabs(1-alpha) < EQUALITY_THRESHOLD)
+                alpha = 1;
+
+            if (fabs(beta) < EQUALITY_THRESHOLD)
+                beta = 0;
+            else if (fabs(1-beta) < EQUALITY_THRESHOLD)
+                beta = 1;
 
             const Node pX = pA + alpha * AB;
             const Node pY = pC + beta * CD;

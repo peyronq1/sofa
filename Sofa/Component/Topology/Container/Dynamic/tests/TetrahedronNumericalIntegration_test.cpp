@@ -63,7 +63,7 @@ struct TetrahedronNumericalIntegration_test : public NumericTest<typename _DataT
     typename sofa::component::topology::container::dynamic::TetrahedronSetGeometryAlgorithms<DataTypes>::SPtr geo;
 
     // Create the context for the scene
-    void SetUp() override
+    void doSetUp() override
     {
         // Init simulation
         simulation = sofa::simulation::getSimulation();
@@ -135,7 +135,7 @@ struct TetrahedronNumericalIntegration_test : public NumericTest<typename _DataT
     }
 
 
-    void TearDown() override
+    void doTearDown() override
     {
         if (root!=nullptr)
             sofa::simulation::node::unload(root);
@@ -143,13 +143,13 @@ struct TetrahedronNumericalIntegration_test : public NumericTest<typename _DataT
 
 };
 
-// Define the list of DataTypes to instanciate
+// Define the list of DataTypes to instantiate
 using ::testing::Types;
 typedef Types<
     Vec3Types
-> DataTypes; // the types to instanciate.
+> DataTypes; // the types to instantiate.
 
-// Test suite for all the instanciations
+// Test suite for all the instantiations
 TYPED_TEST_SUITE(TetrahedronNumericalIntegration_test, DataTypes);
 
 // first test topology

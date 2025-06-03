@@ -28,15 +28,15 @@
 namespace sofa::component::topology::container::dynamic
 {
 
-using namespace std;
-using namespace sofa::defaulttype;
 using sofa::core::topology::edgesInHexahedronArray;
 using sofa::core::topology::quadsOrientationInHexahedronArray;
 using sofa::core::topology::verticesInHexahedronArray;
 
-int HexahedronSetTopologyContainerClass = core::RegisterObject("Hexahedron set topology container")
-        .add< HexahedronSetTopologyContainer >()
-        ;
+void registerHexahedronSetTopologyContainer(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Topology container dedicated to an hexahedral topology.")
+        .add< HexahedronSetTopologyContainer >());
+}
 
 HexahedronSetTopologyContainer::HexahedronSetTopologyContainer()
     : QuadSetTopologyContainer()
@@ -63,6 +63,8 @@ void HexahedronSetTopologyContainer::addHexa(Index a, Index b, Index c, Index d,
 
 void HexahedronSetTopologyContainer::init()
 {
+    core::topology::TopologyContainer::init();
+
     const helper::ReadAccessor< Data< sofa::type::vector<Hexahedron> > > m_hexahedron = d_hexahedron;
 
     if (d_initPoints.isSet())
@@ -83,12 +85,12 @@ void HexahedronSetTopologyContainer::init()
     }
 
     if (!m_hexahedron.empty())
-        initTopology();
+        computeCrossElementBuffers();
 }
 
-void HexahedronSetTopologyContainer::initTopology()
+void HexahedronSetTopologyContainer::computeCrossElementBuffers()
 {
-    QuadSetTopologyContainer::initTopology();
+    QuadSetTopologyContainer::computeCrossElementBuffers();
 
     // Create tetrahedron cross element buffers.
     createQuadsInHexahedronArray();
@@ -135,7 +137,7 @@ void HexahedronSetTopologyContainer::createEdgeSetArray()
             PointID v2 = t[edgesInHexahedronArray[j][1]];
             const Edge e((v1<v2) ? Edge(v1,v2) : Edge(v2,v1));
 
-            if(edgeMap.find(e)==edgeMap.end())
+            if(!edgeMap.contains(e))
             {
                 // edge not in edgeMap so create a new one
                 const size_t edgeIndex = edgeMap.size();
@@ -917,7 +919,7 @@ bool HexahedronSetTopologyContainer::checkConnexity()
 
     if (elemAll.size() != nbr)
     {
-        msg_warning() << "CheckConnexity: Hexahedra are missings. There is more than one connexe component.";
+        msg_warning() << "CheckConnexity: Hexahedra are missing. There is more than one connexe component.";
         return false;
     }
 

@@ -42,9 +42,6 @@
 #include <map>
 #include <deque>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
-
 namespace sofa::component::collision::detection::algorithm
 {
 
@@ -178,7 +175,7 @@ private:
     void updateEndPoints();
 
     /**
-     * Sets the end points ID, i.e. each end point in the list after this mehod have its position (ID) updated.
+     * Sets the end points ID, i.e. each end point in the list after this method have its position (ID) updated.
      */
     void setEndPointsID();
 
@@ -210,12 +207,6 @@ private:
      * Used in initialisation of IncrSAP. It clears all the IncrSAP fields.
      */
     void purge();
-
-    SOFA_ATTRIBUTE_DEPRECATED__REMOVE_BDRAW_DATA()
-    core::objectmodel::lifecycle::DeprecatedData bDraw {this, "v24.06", "v24.12", "draw", "This Data was not used"};
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_COLLISION_DETECTION_ALGORITHM()
-    sofa::core::objectmodel::RenamedData< type::fixed_array<type::Vec3,2> > box; ///< if not empty, objects that do not intersect this bounding-box will be ignored
 
     Data< type::fixed_array<type::Vec3,2> > d_box; ///< if not empty, objects that do not intersect this bounding-box will be ignored
 
@@ -254,16 +245,12 @@ protected:
     ~IncrSAP() override;
 
 public:
-
-    SOFA_ATTRIBUTE_DEPRECATED__REMOVE_BDRAW_DATA()
-    void setDraw(bool) {}
-
     void init() override;
     void reinit() override;
 
     void addCollisionModel (core::CollisionModel *cm) override;
 
-    // Unuseful methods because all is done in addCollisionModel
+    // Useless methods because all is done in addCollisionModel
     void addCollisionPair (const std::pair<core::CollisionModel*, core::CollisionModel*>& ) override {}
     void addCollisionPairs (const type::vector<std::pair<core::CollisionModel*, core::CollisionModel*> >&) override {}
 

@@ -62,23 +62,6 @@ Distances< DataTypes >::Distances ( sofa::component::topology::container::dynami
     d_zonesFramePair.setDisplayed(false); // GUI can not display map.
 
     this->f_printLog.setValue(true);
-
-    showMapIndex.setOriginalData(&d_showMapIndex);
-    showDistanceMap.setOriginalData(&d_showDistanceMap);
-    showGoalDistanceMap.setOriginalData(&d_showGoalDistanceMap);
-    showTextScaleFactor.setOriginalData(&d_showTextScaleFactor);
-    showGradientMap.setOriginalData(&d_showGradientMap);
-    showGradientsScaleFactor.setOriginalData(&d_showGradientsScaleFactor);
-    offset.setOriginalData(&d_offset);
-    distanceType.setOriginalData(&d_distanceType);
-    initTarget.setOriginalData(&d_initTarget);
-    initTargetStep.setOriginalData(&d_initTargetStep);
-    zonesFramePair.setOriginalData(&d_zonesFramePair);
-    harmonicMaxValue.setOriginalData(&d_harmonicMaxValue);
-    fileDistance.setOriginalData(&d_fileDistance);
-    targetPath.setOriginalData(&d_targetPath);
-    hexaContainerPath.setOriginalData(&d_hexaContainerPath);
-
 }
 
 
@@ -111,8 +94,8 @@ void Distances< DataTypes >::init()
         unsigned int realSize = 0;
         const unsigned int step = d_initTargetStep.getValue();
         target->resize( size);
-        helper::WriteAccessor< Data< VecCoord > > xto = *target->write(core::VecCoordId::position());
-        helper::WriteAccessor< Data< VecCoord > > xto0 = *target->write(core::VecCoordId::restPosition());
+        helper::WriteAccessor< Data< VecCoord > > xto = *target->write(core::vec_id::write_access::position);
+        helper::WriteAccessor< Data< VecCoord > > xto0 = *target->write(core::vec_id::write_access::restPosition);
         const Coord& offSet = d_offset.getValue();
         const type::Vec3& voxelSize = hexaContainer->d_voxelSize.getValue();
         for ( unsigned int i = 0; i < size; i++)
@@ -309,7 +292,7 @@ void Distances< DataTypes >::computeGeodesicalDistance ( const unsigned int& map
         const core::topology::BaseMeshTopology::HexaID& hexaID = hexaCoord.first;
         const double& distance = hexaCoord.second;
 
-        if ( hexasParsed.find ( hexaID ) != hexasParsed.end() ) continue;
+        if ( hexasParsed.contains ( hexaID )) continue;
         hexasParsed.insert ( hexaID ); // This hexa has been parsed
 
         // Continue if the distance max is reached

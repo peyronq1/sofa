@@ -44,11 +44,6 @@ PlaneProjectiveConstraint<DataTypes>::PlaneProjectiveConstraint()
 {
     d_indices.beginEdit()->push_back(0);
     d_indices.endEdit();
-
-    f_indices.setOriginalData(&d_indices);
-    f_origin.setOriginalData(&d_origin);
-    f_normal.setOriginalData(&d_normal);
-    f_drawSize.setOriginalData(&d_drawSize);
 }
 
 
@@ -244,7 +239,7 @@ void PlaneProjectiveConstraint<DataTypes>::draw(const core::visual::VisualParams
 {
     if (!vparams->displayFlags().getShowBehaviorModels()) return;
     if (!this->isActive()) return;
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
 

@@ -28,8 +28,6 @@
 
 #include <sofa/core/topology/TopologyData.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::solidmechanics::fem::elastic
 {
 
@@ -72,14 +70,14 @@ public:
      void addMDx(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecDeriv& dx, SReal factor) override;
 
     ///// WARNING this method only add diagonal elements in the given matrix !
-    void addMToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    void addMToMatrix(sofa::linearalgebra::BaseMatrix * mat, SReal mFact, unsigned int &offset) override;
 
     bool isDiagonal() const override { return d_useLumpedMass.getValue(); }
 
     using HexahedralFEMForceFieldT::addKToMatrix;
     using MassT::addKToMatrix;
     ///// WARNING this method only add diagonal elements in the given matrix !
-    void addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
 
     ///// WARNING this method only add diagonal elements in the given matrix !
     void addMBKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
@@ -88,6 +86,8 @@ public:
 
      void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
 
+    using HexahedralFEMForceFieldT::getPotentialEnergy;
+    using MassT::getPotentialEnergy;
     SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override
     {
         msg_warning() << "Method getPotentialEnergy not implemented yet.";
@@ -124,25 +124,6 @@ protected:
     void computeLumpedMasses();
 
 protected:
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<Real> _density;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<bool> _useLumpedMass;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<sofa::type::vector<ElementMass>> _elementMasses;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<sofa::type::vector<Real> > _elementTotalMass;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<sofa::type::vector<Real> > _particleMasses;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_SOLIDMECHANICS_FEM_ELASTIC()
-    sofa::core::objectmodel::RenamedData<sofa::type::vector<Coord> > _lumpedMasses;
-
     Data<Real> d_density; ///< density == volumetric mass in english (kg.m-3)
     Data<bool> d_useLumpedMass; ///< Does it use lumped masses?
 

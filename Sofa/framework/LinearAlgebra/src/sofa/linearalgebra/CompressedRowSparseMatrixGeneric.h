@@ -105,6 +105,9 @@ public:
     typedef typename traits::BlockTranspose BlockTranspose;
     typedef typename traits::Real Real;
 
+    template<class TBlock2>
+    using rebind_to = CompressedRowSparseMatrixGeneric< TBlock2, Policy >;
+
     typedef Matrix Expr;
     enum { category = MATRIX_SPARSE };
     enum { operand = 1 };
@@ -294,12 +297,6 @@ public :
             skipCompressZero = true;
             btemp.clear();
         }
-    }
-
-    SOFA_ATTRIBUTE_DISABLED__CRS_BLOCK_RENAMING()
-    void resizeBloc(Index nbBRow, Index nbBCol)
-    {
-        resizeBlock(nbBRow, nbBCol);
     }
 
 protected:
@@ -778,12 +775,6 @@ public:
         return colsValue[colId];
     }
 
-    SOFA_ATTRIBUTE_DISABLED__CRS_BLOCK_RENAMING()
-    const Block& bloc(Index i, Index j) const
-    {
-        return block(i, j);
-    }
-
     /**
     * \brief Write block method
     * @param Line index i and column index j
@@ -885,12 +876,6 @@ public:
             }
             return nullptr;
         }
-    }
-
-    SOFA_ATTRIBUTE_DISABLED__CRS_BLOCK_RENAMING()
-    Block* wbloc(Index i, Index j, bool create = false)
-    {
-        return wblock(i, j, create);
     }
 
     /**

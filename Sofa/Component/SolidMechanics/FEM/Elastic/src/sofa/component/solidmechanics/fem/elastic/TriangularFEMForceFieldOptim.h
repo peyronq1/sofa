@@ -35,7 +35,7 @@ namespace sofa::component::solidmechanics::fem::elastic
 template<class DataTypes>
 class TriangularFEMForceFieldOptim;
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template<class DataTypes>
 class TriangularFEMForceFieldOptimInternalData
 {
@@ -104,7 +104,7 @@ public:
     void reinit() override;
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx) override;
-    void addKToMatrix(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
     void buildStiffnessMatrix(core::behavior::StiffnessMatrix* matrix) override;
     void buildDampingMatrix(core::behavior::DampingMatrix* /*matrix*/) final;
     SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;
@@ -234,7 +234,7 @@ public:
 
 public:
 
-    /// Forcefield intern paramaters
+    /// Forcefield intern parameters
     Data<Real> d_damping; ///< Ratio damping/stiffness
     Data<Real> d_restScale; ///< Scale factor applied to rest positions (to simulate pre-stretched materials)
 

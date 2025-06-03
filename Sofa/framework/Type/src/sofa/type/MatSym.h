@@ -135,9 +135,9 @@ public:
     /// convert matrix to sym
     static void Mat2Sym( const Mat<D, D, real>& M, MatSym<D, real>& W)
     {
-        for (int j = 0; j < D; j++)
+        for (sofa::Size j = 0; j < D; j++)
         {
-            for (int i = 0; i <= j; i++)
+            for (sofa::Size i = 0; i <= j; i++)
             {
                 W(i, j) = (M(i, j) + M(j, i)) / 2;
             }
@@ -399,7 +399,7 @@ public:
         }
     }
 
-    /// Substraction assignment operator.
+    /// Subtraction assignment operator.
     void operator -=(const MatSym< D,real>& m)
     {
         for (sofa::Size i = 0; i < NumberStoredValues; i++)

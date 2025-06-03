@@ -21,6 +21,7 @@
 ******************************************************************************/
 #include "SceneCreator.h"
 #include <SceneCreator/config.h>
+#include <sofa/Modules.h>
 
 #include <sofa/simulation/Simulation.h>
 #include <sofa/simulation/graph/DAGSimulation.h>
@@ -87,15 +88,15 @@ Node::SPtr  createEulerSolverNode(Node::SPtr parent, const std::string& name, co
 
     if (scheme == "Explicit")
     {
-        simpleapi::createObject(parent, "RequiredPlugin", {{"name", "Sofa.Component.ODESolver.Forward"}});
+        simpleapi::createObject(parent, "RequiredPlugin", {{"name", Sofa.Component.ODESolver.Forward}});
         simpleapi::createObject(node, "EulerExplicitSolver", {{"name","Euler Explicit"}});
         return node ;
     }
 
     if (scheme == "Implicit")
     {
-        simpleapi::createObject(parent, "RequiredPlugin", {{"name", "Sofa.Component.ODESolver.Backward"}});
-        simpleapi::createObject(parent, "RequiredPlugin", {{"name", "Sofa.Component.LinearSolver.Iterative"}});
+        simpleapi::createObject(parent, "RequiredPlugin", {{"name", Sofa.Component.ODESolver.Backward}});
+        simpleapi::createObject(parent, "RequiredPlugin", {{"name", Sofa.Component.LinearSolver.Iterative}});
         simpleapi::createObject(node, "EulerImplicitSolver", {{"name","Euler Implicit"},
                                                               {"rayleighStiffness","0.01"},
                                                               {"rayleighMass", "1.0"}}) ;
@@ -109,8 +110,8 @@ Node::SPtr  createEulerSolverNode(Node::SPtr parent, const std::string& name, co
 
     if (scheme == "Implicit_SparseLDL")
     {
-        simpleapi::createObject(parent, "RequiredPlugin", {{"name", "Sofa.Component.ODESolver.Backward"}});
-        simpleapi::createObject(parent, "RequiredPlugin", {{"name", "Sofa.Component.LinearSolver.Direct"}});
+        simpleapi::createObject(parent, "RequiredPlugin", {{"name", Sofa.Component.ODESolver.Backward}});
+        simpleapi::createObject(parent, "RequiredPlugin", {{"name", Sofa.Component.LinearSolver.Direct}});
         simpleapi::createObject(node, "EulerImplicitSolver", {{"name","Euler Implicit"},
                                                                 {"rayleighStiffness","0.01"},
                                                                 {"rayleighMass", "1.0"}}) ;
@@ -329,7 +330,7 @@ void addCollisionModels(Node::SPtr parent, const std::vector<std::string> &eleme
 
     for (auto& element : elements)
     {
-        if( alias.find(element) == alias.end() )
+        if(!alias.contains(element))
         {
             msg_error(parent.get()) << "Unable to create collision model from '"<< element << "'" ;
             continue;
@@ -378,7 +379,7 @@ simulation::Node::SPtr addCube(simulation::Node::SPtr parent, const std::string&
                                const Deriv3& translation, const Deriv3 &rotation, const Deriv3 &scale)
 {
     //TODO(dmarchal): It is unclear to me if this message should be a msg_ (for end user)
-    // or dmsg_ for developpers.
+    // or dmsg_ for developers.
     if (parent == nullptr){
         msg_warning("SceneCreator") << "Parent node is nullptr. Returning Null Pointer." ;
         return nullptr;
@@ -449,7 +450,7 @@ simulation::Node::SPtr addCylinder(simulation::Node::SPtr parent, const std::str
                                    const Deriv3& translation, const Deriv3 &rotation, const Deriv3 &scale)
 {
     //TODO(dmarchal): It is unclear to me if this message should be a msg_ (for end user)
-    // or dmsg_ for developpers.
+    // or dmsg_ for developers.
     if (parent == nullptr){
         msg_warning("SceneCreator") << "Warning: parent node is nullptr. Returning Null Pointer." ;
         return nullptr;
@@ -513,7 +514,7 @@ simulation::Node::SPtr addSphere(simulation::Node::SPtr parent, const std::strin
                                  const Deriv3& translation, const Deriv3 &rotation, const Deriv3 &scale)
 {
     //TODO(dmarchal): It is unclear to me if this message should be a msg_ (for end user)
-    // or dmsg_ for developpers.
+    // or dmsg_ for developers.
     if (parent == nullptr){
         msg_warning("SceneCreator") << "Warning: parent node is nullptr. Returning Null Pointer." ;
         return nullptr;
@@ -573,7 +574,7 @@ simulation::Node::SPtr addPlane(simulation::Node::SPtr parent, const std::string
                                 const Deriv3& translation, const Deriv3 &rotation, const Deriv3 &scale)
 {
     //TODO(dmarchal): It is unclear to me if this message should be a msg_ (for end user)
-    // or dmsg_ for developpers.
+    // or dmsg_ for developers.
     if (parent == nullptr){
         msg_warning("SceneCreator") << " Parent node is nullptr. Returning Null Pointer." ;
         return nullptr;

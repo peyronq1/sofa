@@ -48,7 +48,6 @@ public:
     void doUpdate() override;
 
 protected:
-    SOFA_ATTRIBUTE_REPLACED__TYPEMEMBER(Vector3, sofa::type::Vec3);
     typedef type::fixed_array <unsigned int,3> MTriangle;
     typedef type::fixed_array <unsigned int,4> MQuad;
     typedef type::vector<unsigned int> MPolygon;
@@ -89,7 +88,7 @@ protected:
     type::fixed_array<SReal,10> afIntegral;
 
 public:
-    /// Implementing the GetCustomTemplateName is mandatory to have a custom template name paremters
+    /// Implementing the GetCustomTemplateName is mandatory to have a custom template name parameters
     /// instead of the default one generated automatically by the SOFA_CLASS() macro.
     static std::string GetCustomTemplateName();
 

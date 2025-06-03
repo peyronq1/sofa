@@ -26,8 +26,11 @@
 namespace sofa::component::engine::select
 {
 
-int MeshBoundaryROIClass = core::RegisterObject("Outputs indices of boundary vertices of a triangle/quad mesh")
-        .add< MeshBoundaryROI >(true);
+void registerMeshBoundaryROI(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(core::ObjectRegistrationData("Outputs indices of boundary vertices of a triangle/quad mesh")
+        .add< MeshBoundaryROI >());
+}
 
 MeshBoundaryROI::MeshBoundaryROI(): Inherit1()
                                     , d_triangles(initData(&d_triangles,"triangles","input triangles"))
@@ -43,6 +46,40 @@ MeshBoundaryROI::MeshBoundaryROI(): Inherit1()
 
 void MeshBoundaryROI::init()
 {
+    Inherit1::init();
+
+    if (!d_triangles.isSet() || !d_quads.isSet() )
+    {
+        msg_info(this) << "No topology given. Searching for a BaseMeshTopology in the current context.\n";
+        core::topology::BaseMeshTopology* topology = nullptr;
+        this->getContext()->get(topology, core::objectmodel::BaseContext::Local);
+
+        if (topology)
+        {
+            if (!d_triangles.isSet())
+            {
+                if (core::BaseData* tparent = topology->findData("triangles"))
+                {
+                    d_triangles.setParent(tparent);
+                    d_triangles.setReadOnly(true);
+                }
+            }
+            if (!d_quads.isSet())
+            {
+                if (core::BaseData* tparent = topology->findData("quads"))
+                {
+                    d_quads.setParent(tparent);
+                    d_quads.setReadOnly(true);
+                }
+            }
+        }
+    }
+
+    if (!d_triangles.isSet() && !d_quads.isSet())
+    {
+        msg_warning() << "No topology given. No mesh to process.\n";
+    }
+
     setDirtyValue();
 }
 

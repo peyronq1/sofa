@@ -26,13 +26,11 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/VecTypes.h>
 
-#include <sofa/core/objectmodel/RenamedData.h>
-
 namespace sofa::component::statecontainer
 {
 //using core::objectmodel::Data;
 
-/// This class can be overridden if needed for additionnal storage within template specializations.
+/// This class can be overridden if needed for additional storage within template specializations.
 template<class DataTypes>
 class MappedObjectInternalData
 {
@@ -64,12 +62,6 @@ protected:
 public:
     void init() override;
 
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_STATECONTAINER()
-    sofa::core::objectmodel::RenamedData<VecCoord> f_X;
-
-    SOFA_ATTRIBUTE_DEPRECATED__RENAME_DATA_IN_STATECONTAINER()
-    sofa::core::objectmodel::RenamedData<VecDeriv> f_V;
-
     Data<VecCoord> d_X; ///< position vector
     Data<VecDeriv> d_V; ///< velocity vector
 
@@ -88,7 +80,7 @@ public:
 
     Data< VecCoord >* write(core::VecCoordId v) override
     {
-        if(v == core::VecCoordId::position())
+        if(v == core::vec_id::write_access::position)
             return &d_X;
 
         return nullptr;
@@ -96,7 +88,7 @@ public:
 
     const Data< VecCoord >* read(core::ConstVecCoordId v) const override
     {
-        if(v == core::ConstVecCoordId::position())
+        if(v == core::vec_id::read_access::position)
             return &d_X;
         else
             return nullptr;
@@ -104,7 +96,7 @@ public:
 
     Data< VecDeriv >* write(core::VecDerivId v) override
     {
-        if(v == core::VecDerivId::velocity())
+        if(v == core::vec_id::write_access::velocity)
             return &d_V;
         else
             return nullptr;
@@ -112,7 +104,7 @@ public:
 
     const Data< VecDeriv >* read(core::ConstVecDerivId v) const override
     {
-        if(v == core::ConstVecDerivId::velocity())
+        if(v == core::vec_id::read_access::velocity)
             return &d_V;
         else
             return nullptr;

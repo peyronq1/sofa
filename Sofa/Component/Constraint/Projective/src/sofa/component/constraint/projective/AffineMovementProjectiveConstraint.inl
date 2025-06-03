@@ -51,15 +51,6 @@ AffineMovementProjectiveConstraint<DataTypes>::AffineMovementProjectiveConstrain
         d_beginConstraintTime = 0;
     if(!d_endConstraintTime.isSet())
         d_endConstraintTime = 20;
-
-    m_meshIndices.setOriginalData(&d_meshIndices);
-    m_indices.setOriginalData(&d_indices);
-    m_beginConstraintTime.setOriginalData(&d_beginConstraintTime);
-    m_endConstraintTime.setOriginalData(&d_endConstraintTime);
-    m_rotation.setOriginalData(&d_rotation);
-    m_quaternion.setOriginalData(&d_quaternion);
-    m_translation.setOriginalData(&d_translation);
-    m_drawConstrainedPoints.setOriginalData(&d_drawConstrainedPoints);
 }
 
 
@@ -300,7 +291,7 @@ template <class DataTypes>
 void AffineMovementProjectiveConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
     const SetIndexArray & indices = d_indices.getValue();
-    const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
+    const VecCoord& x = this->mstate->read(core::vec_id::read_access::position)->getValue();
     Vec3 point;
 
     if(d_drawConstrainedPoints.getValue())

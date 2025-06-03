@@ -78,9 +78,8 @@ using  sofa::helper::logging::RichConsoleStyleMessageFormatter ;
 using  sofa::helper::logging::MainPerComponentLoggingMessageHandler ;
 
 #include <sofa/helper/AdvancedTimer.h>
+#include <sofa/helper/system/FileRepository.h>
 
-#include <sofa/gui/common/GuiDataRepository.h>
-using sofa::gui::common::GuiDataRepository ;
 
 using sofa::helper::system::DataRepository;
 using sofa::helper::system::PluginRepository;
@@ -108,23 +107,24 @@ void addGUIParameters(sofa::gui::common::ArgumentParser* argumentParser)
     GUIManager::RegisterParameters(argumentParser);
 }
 
+static std::string appName { "runSofa" };
+
 // ---------------------------------------------------------------------
 // ---
 // ---------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-    // Add resources dir to GuiDataRepository
-    const std::string runSofaIniFilePath = Utils::getSofaPathTo("/etc/runSofa.ini");
-    std::map<std::string, std::string> iniFileValues = Utils::readBasicIniFile(runSofaIniFilePath);
-    if (iniFileValues.find("RESOURCES_DIR") != iniFileValues.end())
-    {
-        std::string dir = iniFileValues["RESOURCES_DIR"];
-        dir = SetDirectory::GetRelativeFromProcess(dir.c_str());
-        if(FileSystem::isDirectory(dir))
-        {
-            sofa::gui::common::GuiDataRepository.addFirstPath(dir);
-        }
-    }
+
+  sofa::helper::system::FileRepository runSofaDataRepository(
+            "RUNSOFA_DATA_PATH",
+            {
+                    Utils::getSofaPathTo("share/sofa/gui/runSofa")
+            },
+            {
+                    { Utils::getSofaPathTo("etc/runSofa.ini").c_str(), {"RESOURCES_DIR"} }
+            }
+    );
+
 
     sofa::helper::BackTrace::autodump();
 
@@ -359,7 +359,7 @@ int main(int argc, char** argv)
         MessageDispatcher::addHandler( new ExceptionMessageHandler() ) ;
     }
     else{
-        msg_warning("") << "Invalid argument '" << messageHandler << "' for '--formatting'";
+        msg_warning(appName) << "Invalid argument '" << messageHandler << "' for '--formatting'";
     }
     MessageDispatcher::addHandler(&MainPerComponentLoggingMessageHandler::getInstance()) ;
 #ifdef TRACY_ENABLE
@@ -367,15 +367,15 @@ int main(int argc, char** argv)
 #endif
 
     // Output FileRepositories
-    msg_info("runSofa") << "PluginRepository paths = " << PluginRepository.getPathsJoined();
-    msg_info("runSofa") << "DataRepository paths = " << DataRepository.getPathsJoined();
-    msg_info("runSofa") << "GuiDataRepository paths = " << GuiDataRepository.getPathsJoined();
+    msg_info(appName) << "PluginRepository paths = " << PluginRepository.getPathsJoined();
+    msg_info(appName) << "DataRepository paths = " << DataRepository.getPathsJoined();
+    msg_info(appName) << "runSofaDataRepository paths = " << runSofaDataRepository.getPathsJoined();
 
     // Initialise paths
-    BaseGUI::setConfigDirectoryPath(Utils::getSofaPathPrefix() + "/config", true);
-    BaseGUI::setScreenshotDirectoryPath(Utils::getSofaPathPrefix() + "/screenshots", true);
+    BaseGUI::setConfigDirectoryPath(FileSystem::append(Utils::getSofaUserLocalDirectory(), "config"), true);
+    BaseGUI::setScreenshotDirectoryPath(FileSystem::append(Utils::getSofaDataDirectory(), "screenshots"), true);
 
-    // Add Batch GUI (runSofa without any GUIs wont be useful)
+    // Add Batch GUI (runSofa without any GUIs won't be useful)
     sofa::gui::batch::init();
 
     auto& pluginManager = PluginManager::getInstance();
@@ -392,26 +392,26 @@ int main(int argc, char** argv)
 
         if (PluginRepository.findFile(configPluginPath, "", nullptr))
         {
-            msg_info("runSofa") << "Loading automatically plugin list in " << configPluginPath;
+            msg_info(appName) << "Loading automatically plugin list in " << configPluginPath;
             pluginManager.readFromIniFile(configPluginPath);
         }
         else if (PluginRepository.findFile(defaultConfigPluginPath, "", nullptr))
         {
-            msg_info("runSofa") << "Loading automatically plugin list in " << defaultConfigPluginPath;
+            msg_info(appName) << "Loading automatically plugin list in " << defaultConfigPluginPath;
             pluginManager.readFromIniFile(defaultConfigPluginPath);
         }
         else
         {
-            msg_info("runSofa") << "No plugin list found. No plugin will be automatically loaded.";
+            msg_info(appName) << "No plugin list found. No plugin will be automatically loaded.";
         }
     }
     else
     {
-        msg_info("runSofa") << "Automatic plugin loading disabled.";
+        msg_info(appName) << "Automatic plugin loading disabled.";
     }
 
     sofa::core::ObjectFactory* objectFactory = sofa::core::ObjectFactory::getInstance();
-    // calling explicitely registerObjects from loadedPlugins
+    // calling explicitly registerObjects from loadedPlugins
     for (const auto& [pluginPath, plugin] : pluginManager.getPluginMap())
     {
         const auto& pluginName = plugin.getModuleName();
@@ -422,7 +422,7 @@ int main(int argc, char** argv)
     addGUIParameters(argParser);
     argParser->parse();
 
-    // Fetching file name must be done after the additionnal potential options have been added
+    // Fetching file name must be done after the additional potential options have been added
     // otherwise the first parsing will take the unknown options as the file name
     // (because of its positional parameter)
     files = argParser->getInputFileList();
@@ -450,7 +450,7 @@ int main(int argc, char** argv)
             mrulist.close();
         }
         else
-            fileName = "Demos/caduceus.scn";
+            fileName = "Demos/fallingSOFA.scn";
 
         fileName = DataRepository.getFile(fileName);
     }
@@ -489,7 +489,7 @@ int main(int argc, char** argv)
     sofa::simulation::node::initRoot(groot.get());
     if( computationTimeAtBegin )
     {
-        msg_info("") << sofa::helper::AdvancedTimer::end("Init", groot->getTime(), groot->getDt());
+        msg_info(appName) << sofa::helper::AdvancedTimer::end("Init", groot->getTime(), groot->getDt());
     }
 
     //=======================================
@@ -504,9 +504,9 @@ int main(int argc, char** argv)
 
     if (printFactory)
     {
-        msg_info("") << "////////// FACTORY //////////" ;
+        msg_info(appName) << "////////// FACTORY //////////" ;
         sofa::helper::printFactoryLog();
-        msg_info("") << "//////// END FACTORY ////////" ;
+        msg_info(appName) << "//////// END FACTORY ////////" ;
     }
 
     if( computationTimeSampling>0 )
